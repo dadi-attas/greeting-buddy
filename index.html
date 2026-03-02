@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#F59E0B" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Greeting Buddy" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Greeting Buddy</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Heebo:wght@400;500;600;700&display=swap');
+
+    :root {
+      --gold: #F59E0B;
+      --gold-dark: #D97706;
+      --orange: #F97316;
+      --orange-light: #FED7AA;
+      --cream: #FFFBF0;
+      --white: #FFFFFF;
+      --text-dark: #1C1917;
+      --text-mid: #57534E;
+      --shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
+      --radius: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: var(--cream);
+      color: var(--text-dark);
+      min-height: 100vh;
+      max-width: 430px;
+      margin: 0 auto;
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--orange) 100%);
+      padding: 20px 20px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app-header::before {
+      content: '🎉';
+      position: absolute;
+      font-size: 80px;
+      opacity: 0.12;
+      top: -10px;
+      left: -10px;
+      transform: rotate(-15deg);
+      pointer-events: none;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .app-logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: 26px;
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    .settings-btn {
+      background: rgba(255,255,255,0.25);
+      border: none;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .header-greeting {
+      color: rgba(255,255,255,0.9);
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .main-content {
+      padding: 20px 16px 100px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+    }
+
+    .empty-state .emoji {
+      font-size: 72px;
+      display: block;
+      margin-bottom: 16px;
+      animation: bounce 2s infinite;
+    }
+
+    .empty-state h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .empty-state p {
+      font-size: 15px;
+      color: #57534E;
+      line-height: 1.6;
+    }
+
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--gold) 0%, var(--orange) 100%);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      padding: 16px 32px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(249, 115, 22, 0.45);
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* ===== ONBOARDING ===== */
+    #onboarding {
+      position: fixed;
+      inset: 0;
+      background: var(--cream);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .onboard-wrap {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .onboard-step {
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .onboard-emoji {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .onboard-step h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-dark);
+    }
+
+    .onboard-step p {
+      font-size: 16px;
+      color: var(--text-mid);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .onboard-field {
+      text-align: right;
+      margin-bottom: 20px;
+    }
+
+    .onboard-field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-mid);
+      margin-bottom: 8px;
+    }
+
+    .onboard-field input,
+    .onboard-field select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #E7E5E4;
+      border-radius: 12px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 16px;
+      background: white;
+      color: var(--text-dark);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .onboard-field input:focus,
+    .onboard-field select:focus {
+      border-color: var(--gold);
+    }
+
+    .gender-btns {
+      display: flex;
+      gap: 12px;
+    }
+
+    .gender-btn {
+      flex: 1;
+      padding: 14px;
+      border: 2px solid #E7E5E4;
+      border-radius: 12px;
+      background: white;
+      font-family: 'Heebo', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .gender-btn.active {
+      border-color: var(--gold);
+      background: var(--orange-light);
+      color: var(--gold-dark);
+    }
+
+    .onboard-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--gold), var(--orange));
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      box-shadow: 0 4px 16px rgba(249,115,22,0.35);
+    }
+
+    .onboard-skip {
+      width: 100%;
+      padding: 12px;
+      background: none;
+      color: var(--text-light);
+      border: none;
+      font-family: 'Heebo', sans-serif;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .edit-event-btn {
+      flex: 1;
+      padding: 14px;
+      background: white;
+      border: 2px solid var(--gold);
+      border-radius: 14px;
+      color: var(--gold-dark);
+      font-family: 'Heebo', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .cancel-event-btn {
+      flex: 1;
+      padding: 14px;
+      background: white;
+      border: 2px solid #FCA5A5;
+      border-radius: 14px;
+      color: #EF4444;
+      font-family: 'Heebo', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ===== SETTINGS ===== */
+    .settings-section {
+      background: white;
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .settings-section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-mid);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #F5F5F4;
+    }
+
+    /* ===== GREETING CARD ===== */
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .template-option {
+      cursor: pointer;
+      text-align: center;
+      border: 2px solid #E7E5E4;
+      border-radius: 12px;
+      padding: 8px;
+      transition: all 0.2s;
+    }
+
+    .template-option.selected {
+      border-color: var(--gold);
+      background: var(--orange-light);
+    }
+
+    .tpl-preview {
+      height: 60px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .tpl-minimal { background: #F8F8F8; color: #333; font-weight: 700; }
+    .tpl-classic { background: linear-gradient(135deg, #FEF3C7, #FDE68A); }
+    .tpl-colorful { background: linear-gradient(135deg, #FF6B6B, #4ECDC4); }
+    .tpl-humor { background: linear-gradient(135deg, #A8E6CF, #FFD3A5); }
+    .tpl-dark { background: linear-gradient(135deg, #1C1917, #44403C); }
+
+    .tpl-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-mid);
+    }
+
+    .colors-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .color-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .color-dot.selected {
+      border-color: var(--text-dark);
+      transform: scale(1.2);
+    }
+
+    /* ===== AFTER APPROVAL ===== */
+    .approved-badge {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #16A34A;
+      background: #DCFCE7;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .whatsapp-btn {
+      width: 100%;
+      padding: 16px;
+      background: #25D366;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Heebo', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 16px rgba(37,211,102,0.35);
+    }
+
+    .card-btn {
+      width: 100%;
+      padding: 16px;
+      background: white;
+      border: 2px solid var(--gold);
+      border-radius: 14px;
+      color: var(--gold-dark);
+      font-family: 'Heebo', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ===== GREETING RESULT ===== */
+    @keyframes spin {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.2); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    .loading-emoji {
+      font-size: 56px;
+      animation: spin 1.5s infinite;
+    }
+
+    .greeting-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      border-right: 4px solid var(--gold);
+      position: relative;
+    }
+
+    .greeting-card::before {
+      content: '❝';
+      font-size: 40px;
+      color: var(--orange-light);
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      line-height: 1;
+    }
+
+    .greeting-text {
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--text-dark);
+      white-space: pre-wrap;
+      padding-top: 20px;
+    }
+
+    .result-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .rewrite-btn {
+      width: 100%;
+      padding: 14px;
+      background: white;
+      border: 2px solid var(--gold);
+      border-radius: 14px;
+      color: var(--gold-dark);
+      font-family: 'Heebo', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ===== PROGRESS BAR ===== */
+    .progress-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .progress-step {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #E7E5E4;
+      color: #A8A29E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .progress-step.active {
+      background: linear-gradient(135deg, var(--gold), var(--orange));
+      color: white;
+    }
+
+    .progress-step.done {
+      background: #10B981;
+      color: white;
+    }
+
+    .progress-line {
+      flex: 1;
+      height: 3px;
+      background: #E7E5E4;
+      margin: 0 8px;
+    }
+
+    .progress-line.active {
+      background: linear-gradient(90deg, #10B981, var(--gold));
+    }
+
+    .progress-labels {
+      position: absolute;
+      bottom: -20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    /* ===== GREETING SCREEN ===== */
+    .required {
+      color: var(--orange);
+    }
+
+    .options-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .option-btn {
+      padding: 10px 16px;
+      border: 2px solid #E7E5E4;
+      border-radius: 20px;
+      background: white;
+      font-family: 'Heebo', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-dark);
+    }
+
+    .option-btn.selected {
+      border-color: var(--gold);
+      background: var(--orange-light);
+      color: var(--gold-dark);
+    }
+
+    .optional-section {
+      margin-bottom: 20px;
+    }
+
+    .optional-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--gold-dark);
+      cursor: pointer;
+      padding: 12px 0;
+      border-top: 1px solid #E7E5E4;
+    }
+
+    .optional-hint {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-light);
+    }
+
+    /* ===== EVENT DETAILS ===== */
+    .edit-btn {
+      background: rgba(0,0,0,0.2);
+      border: none;
+      border-radius: 20px;
+      padding: 8px 14px;
+      color: white;
+      font-family: 'Heebo', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .details-hero {
+      text-align: center;
+      padding: 28px 0 20px;
+    }
+
+    .details-emoji {
+      font-size: 72px;
+      margin-bottom: 8px;
+    }
+
+    .details-type {
+      font-size: 15px;
+      color: var(--text-mid);
+      margin-bottom: 4px;
+    }
+
+    .details-name {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .details-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 8px 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .details-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid #F5F5F4;
+    }
+
+    .details-row:last-child {
+      border-bottom: none;
+    }
+
+    .details-label {
+      font-size: 14px;
+      color: var(--text-mid);
+    }
+
+    .details-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .delete-btn {
+      width: 100%;
+      padding: 14px;
+      background: none;
+      border: 2px solid #FCA5A5;
+      border-radius: 14px;
+      color: #EF4444;
+      font-family: 'Heebo', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+
+    /* ===== SCREENS ===== */
+    #addEventScreen {
+      position: fixed;
+      inset: 0;
+      background: var(--cream);
+      z-index: 900;
+      overflow-y: auto;
+    }
+
+    .screen-header {
+      background: linear-gradient(135deg, var(--gold), var(--orange));
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .screen-header h2 {
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .back-btn {
+      background: rgba(0,0,0,0.2);
+      border: none;
+      border-radius: 20px;
+      padding: 8px 14px;
+      color: white;
+      font-family: 'Heebo', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .screen-content {
+      padding: 20px 16px 40px;
+    }
+
+    .step-hint {
+      font-size: 15px;
+      color: var(--text-mid);
+      margin-bottom: 16px;
+    }
+
+    .topic-block {
+      background: white;
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .topic-title {
+      padding: 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-dark);
+    }
+
+    .topic-title:hover {
+      background: #FFF8F0;
+    }
+
+    .topic-events {
+      border-top: 1px solid #F5F5F4;
+    }
+
+    .event-option {
+      padding: 14px 20px;
+      font-size: 15px;
+      cursor: pointer;
+      color: var(--text-dark);
+      border-bottom: 1px solid #F5F5F4;
+      transition: background 0.15s;
+    }
+
+    .event-option:hover {
+      background: var(--orange-light);
+      color: var(--gold-dark);
+      font-weight: 600;
+    }
+
+    .event-option:last-child {
+      border-bottom: none;
+    }
+
+    .selected-type-badge {
+      background: linear-gradient(135deg, var(--gold), var(--orange));
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 12px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* ===== EVENT LIST ===== */
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-mid);
+      margin-bottom: 12px;
+    }
+
+    .event-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 2px solid transparent;
+    }
+
+    .event-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(245,158,11,0.28);
+      border-color: var(--gold);
+    }
+
+    .event-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--gold), var(--orange));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .event-info { flex: 1; }
+
+    .event-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 3px;
+    }
+
+    .event-date {
+      font-size: 13px;
+      color: var(--text-mid);
+    }
+
+    .event-days {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold-dark);
+      background: var(--orange-light);
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .event-days.soon {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- EDIT EVENT SCREEN -->
+  <div id="editEventScreen" style="display:none;">
+    <div class="screen-header">
+      <button class="back-btn" onclick="closeEditEvent()">→ חזור</button>
+      <h2>עריכת אירוע</h2>
+      <div></div>
+    </div>
+
+    <div class="screen-content">
+      <div class="selected-type-badge" id="editEventBadge"></div>
+
+      <div class="onboard-field">
+        <label>תאריך חדש</label>
+        <input type="date" id="editEventDate" />
+      </div>
+
+      <button class="onboard-btn" onclick="confirmSaveEdit()">שמור שינויים</button>
+    </div>
+  </div>
+
+  <!-- CONFIRM DIALOG -->
+  <div id="confirmDialog" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; padding:24px;">
+    <div style="background:white; border-radius:20px; padding:28px; width:100%; max-width:340px; text-align:center;">
+      <div style="font-size:32px; margin-bottom:12px;" id="confirmEmoji">🤔</div>
+      <div style="font-size:18px; font-weight:700; margin-bottom:8px; color:#1C1917;" id="confirmTitle"></div>
+      <div style="font-size:15px; color:#57534E; margin-bottom:24px;" id="confirmText"></div>
+      <div style="display:flex; gap:12px;">
+        <button onclick="confirmNo()" style="flex:1; padding:14px; border:2px solid #E7E5E4; border-radius:12px; background:white; font-family:'Heebo',sans-serif; font-size:16px; font-weight:700; cursor:pointer;">לא</button>
+        <button onclick="confirmYes()" style="flex:1; padding:14px; border:none; border-radius:12px; background:linear-gradient(135deg,#F59E0B,#F97316); color:white; font-family:'Heebo',sans-serif; font-size:16px; font-weight:700; cursor:pointer;" id="confirmYesBtn">כן</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS SCREEN -->
+  <div id="settingsScreen" style="display:none;">
+    <div class="screen-header">
+      <button class="back-btn" onclick="closeSettings()">→ חזור</button>
+      <h2>הגדרות</h2>
+      <div></div>
+    </div>
+
+    <div class="screen-content">
+
+      <div class="settings-section">
+        <div class="settings-section-title">👤 פרטים אישיים</div>
+
+        <div class="onboard-field">
+          <label>שם פרטי</label>
+          <input type="text" id="settingsName" maxlength="20" />
+        </div>
+
+        <div class="onboard-field">
+          <label>אני</label>
+          <div class="gender-btns">
+            <button class="gender-btn" id="settingsGenderMale" onclick="setSettingsGender('male')">גבר</button>
+            <button class="gender-btn" id="settingsGenderFemale" onclick="setSettingsGender('female')">אישה</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">🔔 הגדרות תזכורות</div>
+
+        <div class="onboard-field">
+          <label>שעת התזכורת ביום האירוע</label>
+          <select id="settingsReminderTime">
+            <option value="07:00">07:00</option>
+            <option value="08:00">08:00</option>
+            <option value="09:00">09:00</option>
+            <option value="10:00">10:00</option>
+            <option value="11:00">11:00</option>
+            <option value="12:00">12:00</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="onboard-btn" onclick="saveSettings()">שמור שינויים ✓</button>
+
+    </div>
+  </div>
+
+  <!-- GREETING CARD SCREEN -->
+  <div id="greetingCardScreen" style="display:none;">
+    <div class="screen-header">
+      <button class="back-btn" onclick="closeGreetingCard()">→ חזור</button>
+      <h2>כרטיס ברכה</h2>
+      <div></div>
+    </div>
+
+    <div class="screen-content">
+
+      <!-- בחירת תבנית -->
+      <div id="cardDesignStep">
+        <p class="step-hint">בחירת תבנית:</p>
+
+        <div class="templates-grid">
+          <div class="template-option" onclick="selectTemplate(1)" id="tpl1">
+            <div class="tpl-preview tpl-minimal">
+              <span>Aa</span>
+            </div>
+            <div class="tpl-name">מינימליסט</div>
+          </div>
+          <div class="template-option" onclick="selectTemplate(2)" id="tpl2">
+            <div class="tpl-preview tpl-classic">
+              <span>🎊</span>
+            </div>
+            <div class="tpl-name">חגיגי קלאסי</div>
+          </div>
+          <div class="template-option" onclick="selectTemplate(3)" id="tpl3">
+            <div class="tpl-preview tpl-colorful">
+              <span>🌈</span>
+            </div>
+            <div class="tpl-name">צבעוני</div>
+          </div>
+          <div class="template-option" onclick="selectTemplate(4)" id="tpl4">
+            <div class="tpl-preview tpl-humor">
+              <span>😄</span>
+            </div>
+            <div class="tpl-name">הומור קל</div>
+          </div>
+          <div class="template-option" onclick="selectTemplate(5)" id="tpl5">
+            <div class="tpl-preview tpl-dark">
+              <span>✨</span>
+            </div>
+            <div class="tpl-name">מודרני כהה</div>
+          </div>
+        </div>
+
+        <div class="onboard-field" style="margin-top:20px;">
+          <label>צבע מוביל</label>
+          <div class="colors-grid">
+            <div class="color-dot" style="background:#F59E0B;" onclick="selectColor('#F59E0B',this)"></div>
+            <div class="color-dot" style="background:#EF4444;" onclick="selectColor('#EF4444',this)"></div>
+            <div class="color-dot" style="background:#8B5CF6;" onclick="selectColor('#8B5CF6',this)"></div>
+            <div class="color-dot" style="background:#10B981;" onclick="selectColor('#10B981',this)"></div>
+            <div class="color-dot" style="background:#3B82F6;" onclick="selectColor('#3B82F6',this)"></div>
+            <div class="color-dot" style="background:#EC4899;" onclick="selectColor('#EC4899',this)"></div>
+            <div class="color-dot" style="background:#F97316;" onclick="selectColor('#F97316',this)"></div>
+            <div class="color-dot" style="background:#1C1917;" onclick="selectColor('#1C1917',this)"></div>
+          </div>
+        </div>
+
+        <div class="onboard-field">
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+            <input type="checkbox" id="emojisCheck" checked style="width:20px; height:20px; accent-color:var(--gold);" />
+            עם אימוג׳ים
+          </label>
+        </div>
+
+        <button class="onboard-btn" onclick="previewCard()">צפייה בכרטיס ←</button>
+      </div>
+
+      <!-- תצוגה מקדימה -->
+      <div id="cardPreviewStep" style="display:none;">
+        <div id="cardCanvas" style="border-radius:16px; overflow:hidden; margin-bottom:24px; box-shadow:0 8px 32px rgba(0,0,0,0.15);"></div>
+
+        <button class="onboard-btn" onclick="shareCard()">
+          📤 שתף בוואטסאפ
+        </button>
+        <button class="rewrite-btn" style="margin-top:12px;" onclick="backToCardDesign()">
+          🔁 תעצב אחרת
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GREETING RESULT SCREEN -->
+  <div id="greetingResultScreen" style="display:none;">
+    <div class="screen-header">
+      <button class="back-btn" onclick="closeGreetingResult()">→ חזור</button>
+      <h2>הברכה שלך</h2>
+      <div></div>
+    </div>
+
+    <div class="screen-content">
+
+      <!-- טוען -->
+      <div id="loadingGreeting" style="text-align:center; padding:60px 20px;">
+        <div class="loading-emoji">✨</div>
+        <p style="font-size:16px; color:var(--text-mid); margin-top:16px;">יוצר ברכה אישית...</p>
+      </div>
+
+      <!-- תוצאה -->
+      <div id="greetingResult" style="display:none;">
+        <div class="greeting-card">
+          <div class="greeting-text" id="greetingText"></div>
+        </div>
+
+        <div class="result-actions">
+          <button class="onboard-btn" onclick="approveGreeting()">✅ אישור ברכה</button>
+          <button class="rewrite-btn" onclick="showRewriteOptions()">🔁 תכתוב אחת אחרת</button>
+        </div>
+
+        <!-- אחרי אישור -->
+        <div id="afterApproval" style="display:none;">
+          <div class="approved-badge">✅ הברכה אושרה!</div>
+          <button class="whatsapp-btn" onclick="sendAsText()">
+            💬 שלח כטקסט בוואטסאפ
+          </button>
+          <button class="card-btn" onclick="openGreetingCard()">
+            🎨 עצב בכרטיס ברכה
+          </button>
+        </div>
+
+        <!-- אפשרויות כתיבה מחדש -->
+        <div id="rewriteOptions" style="display:none;">
+          <p class="step-hint">לאיזה כיוון?</p>
+          <div class="options-grid">
+            <button class="option-btn" onclick="rewriteGreeting('יותר קצר')">📝 יותר קצר</button>
+            <button class="option-btn" onclick="rewriteGreeting('יותר ארוך')">📃 יותר ארוך</button>
+            <button class="option-btn" onclick="rewriteGreeting('יותר מצחיק')">😄 יותר מצחיק</button>
+            <button class="option-btn" onclick="rewriteGreeting('יותר מרגש')">🥹 יותר מרגש</button>
+            <button class="option-btn" onclick="rewriteGreeting('יותר רשמי')">👔 יותר רשמי</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GREETING SCREEN -->
+  <div id="greetingScreen" style="display:none;">
+    <div class="screen-header">
+      <button class="back-btn" onclick="closeGreeting()">→ חזור</button>
+      <h2>יצירת ברכה</h2>
+      <div></div>
+    </div>
+
+    <div class="screen-content">
+
+      <!-- שלב א: שאלון -->
+      <div id="questionnaireStep">
+        <div class="progress-bar">
+          <div class="progress-step active">1</div>
+          <div class="progress-line"></div>
+          <div class="progress-step">2</div>
+          <div class="progress-labels">
+            <span>שאלון</span>
+            <span>סגנון</span>
+          </div>
+        </div>
+        <div class="selected-type-badge" id="greetingEventBadge"></div>
+
+        <!-- שאלות חובה -->
+        <div class="onboard-field">
+          <label>מה הקשר שלך אליו/אליה? <span class="required">*</span></label>
+          <div class="options-grid" id="relationOptions">
+            <button class="option-btn" onclick="selectOption(this,'relation','משפחה')">👨‍👩‍👧 משפחה</button>
+            <button class="option-btn" onclick="selectOption(this,'relation','חבר/ה')">👫 חבר/ה</button>
+            <button class="option-btn" onclick="selectOption(this,'relation','קולגה')">💼 קולגה</button>
+            <button class="option-btn" onclick="selectOption(this,'relation','שכן/ה')">🏘️ שכן/ה</button>
+            <button class="option-btn" onclick="selectOption(this,'relation','מכר/ה')">🤝 מכר/ה</button>
+          </div>
+        </div>
+
+        <div class="onboard-field">
+          <label>דבר אחד שתרצה לאחל / לציין <span class="required">*</span></label>
+          <input type="text" id="mainWish" placeholder="לדוגמה: בריאות, הצלחה, אהבה..." maxlength="60" />
+        </div>
+
+        <div class="onboard-field">
+          <label>איך לחתום? <span class="required">*</span></label>
+          <input type="text" id="signText" placeholder="לדוגמה: דדי, משפחת כהן, דודתך רחל..." maxlength="40" />
+        </div>
+
+        <!-- שאלות אופציונליות -->
+        <div class="optional-section">
+          <div class="optional-title" onclick="toggleOptional()">
+            ➕ פרטים נוספים (אופציונלי)
+            <span class="optional-hint">מוסיף אישיות לברכה</span>
+          </div>
+          <div id="optionalFields" style="display:none;">
+            <div class="onboard-field">
+              <label>גיל / טווח גיל</label>
+              <input type="text" id="ageHint" placeholder="לדוגמה: 30, בשנות ה-40..." maxlength="30" />
+            </div>
+            <div class="onboard-field">
+              <label>תחביב / אהבה</label>
+              <input type="text" id="hobbyHint" placeholder="לדוגמה: ספורט, בישול, מוזיקה..." maxlength="40" />
+            </div>
+            <div class="onboard-field">
+              <label>תכונה בולטת</label>
+              <input type="text" id="traitHint" placeholder="לדוגמה: אופטימי, יצירתי, חם..." maxlength="40" />
+            </div>
+          </div>
+        </div>
+
+        <button class="onboard-btn" onclick="goToStyle()">מעבר לבחירת סגנון ←</button>
+        <button class="onboard-skip" onclick="quickGreeting()">אין לי כוח – תן ברכה כללית</button>
+      </div>
+
+      <!-- שלב ב: בחירת סגנון -->
+      <div id="styleStep" style="display:none;">
+        <div class="progress-bar">
+          <div class="progress-step done">✓</div>
+          <div class="progress-line active"></div>
+          <div class="progress-step active">2</div>
+          <div class="progress-labels">
+            <span>שאלון</span>
+            <span>סגנון</span>
+          </div>
+        </div>
+        <p class="step-hint">בחירת הסגנון המתאים לך:</p>
+
+        <div class="onboard-field">
+          <label>טון הברכה</label>
+          <div class="options-grid" id="toneOptions">
+            <button class="option-btn" onclick="selectOption(this,'tone','רשמי')">👔 רשמי</button>
+            <button class="option-btn" onclick="selectOption(this,'tone','קליל')">😊 קליל</button>
+            <button class="option-btn" onclick="selectOption(this,'tone','הומוריסטי')">😄 הומוריסטי</button>
+            <button class="option-btn" onclick="selectOption(this,'tone','חם/מרגש')">🤗 חם/מרגש</button>
+          </div>
+        </div>
+
+        <div class="onboard-field">
+          <label>אורך הברכה</label>
+          <div class="options-grid" id="lengthOptions">
+            <button class="option-btn" onclick="selectOption(this,'length','קצר')">📝 קצר</button>
+            <button class="option-btn" onclick="selectOption(this,'length','בינוני')">📄 בינוני</button>
+            <button class="option-btn" onclick="selectOption(this,'length','ארוך')">📃 ארוך</button>
+          </div>
+        </div>
+
+        <button class="onboard-btn" onclick="generateGreeting()">✨ יצירת ברכה</button>
+        <button class="onboard-skip" onclick="backToQuestionnaire()">← חזור לשאלון</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- EVENT DETAILS SCREEN -->
+  <div id="eventDetailsScreen" style="display:none;">
+    <div class="screen-header">
+      <button class="back-btn" onclick="closeEventDetails()">→ חזור</button>
+      <h2 id="detailsTitle">פרטי אירוע</h2>
+      <div></div>
+    </div>
+
+    <div class="screen-content">
+
+      <div class="details-hero">
+        <div class="details-emoji" id="detailsEmoji">🎂</div>
+        <div class="details-type" id="detailsType">יום הולדת</div>
+        <div class="details-name" id="detailsName">משה</div>
+      </div>
+
+      <div class="details-card">
+        <div class="details-row">
+          <span class="details-label">📅 תאריך</span>
+          <span class="details-value" id="detailsDate"></span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">⏳ נותר</span>
+          <span class="details-value" id="detailsDaysLeft"></span>
+        </div>
+        <div class="details-row" id="detailsRecurringRow">
+          <span class="details-label">🔁 חוזר כל שנה</span>
+          <span class="details-value">כן ✓</span>
+        </div>
+      </div>
+
+      <button class="onboard-btn" id="createGreetingBtn" onclick="startGreeting()">
+        ✨ יצירת ברכה
+      </button>
+
+      <div style="display:flex; gap:12px; margin-top:12px;">
+        <button class="edit-event-btn" onclick="openEditEvent()">✏️ עריכת אירוע</button>
+        <button class="cancel-event-btn" onclick="confirmCancelEvent()">✕ ביטול אירוע</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- INSTALL SCREEN -->
+  <div id="installScreen" style="display:none; position:fixed; inset:0; background:var(--cream); z-index:1000; display:none; align-items:center; justify-content:center; padding:24px;">
+    <div style="width:100%; max-width:380px; text-align:center;">
+      <div style="font-size:64px; margin-bottom:16px;">📲</div>
+      <h2 style="font-size:24px; font-weight:700; margin-bottom:12px;">הוסף למסך הבית</h2>
+      <p style="font-size:15px; color:var(--text-mid); line-height:1.6; margin-bottom:28px;">
+        קבל גישה מהירה ל-Greeting Buddy ישירות ממסך הבית שלך
+      </p>
+
+      <!-- אנדרואיד -->
+      <div id="androidInstall">
+        <button class="onboard-btn" id="androidInstallBtn" onclick="installAndroid()">
+          ➕ הוסף למסך הבית
+        </button>
+      </div>
+
+      <!-- אייפון -->
+      <div id="iosInstall" style="display:none;">
+        <div style="background:white; border-radius:16px; padding:20px; box-shadow:var(--shadow); text-align:right; margin-bottom:20px;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid #F5F5F4;">
+            <div style="font-size:28px;">1️⃣</div>
+            <div>
+              <div style="font-weight:700; font-size:15px;">לחץ על כפתור השיתוף</div>
+              <div style="font-size:13px; color:var(--text-mid);">הריבוע עם החץ למעלה ⬆️ בתחתית המסך</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid #F5F5F4;">
+            <div style="font-size:28px;">2️⃣</div>
+            <div>
+              <div style="font-weight:700; font-size:15px;">גלול למטה ובחר</div>
+              <div style="font-size:13px; color:var(--text-mid);">"הוסף למסך הבית" 📱</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="font-size:28px;">3️⃣</div>
+            <div>
+              <div style="font-weight:700; font-size:15px;">לחץ "הוסף"</div>
+              <div style="font-size:13px; color:var(--text-mid);">האייקון יופיע על מסך הבית ✅</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="onboard-skip" onclick="skipInstall()">דלג על זה</button>
+    </div>
+  </div>
+
+  <!-- ADD EVENT SCREEN -->
+  <div id="addEventScreen" style="display:none;">
+    <div class="screen-header">
+      <button class="back-btn" onclick="smartBack()">→ חזור</button>
+      <h2>הוספת אירוע</h2>
+      <div></div>
+    </div>
+
+    <div class="screen-content">
+
+      <!-- שלב א: בחירת נושא -->
+      <div id="topicsStep">
+        <p class="step-hint">הוספת אירוע - בחר קטגוריה:</p>
+
+        <div class="topic-block">
+          <div class="topic-title" onclick="toggleTopic('family')">👨‍👩‍👧 משפחה ומסורת <span class="arrow">▼</span></div>
+          <div class="topic-events" id="family" style="display:none;">
+            <div class="event-option" onclick="selectEventType('יום הולדת','🎂',true)">יום הולדת</div>
+            <div class="event-option" onclick="selectEventType('יום נישואים','💑',true)">יום נישואים</div>
+            <div class="event-option" onclick="selectEventType('אירוסין','💍',false)">אירוסין</div>
+            <div class="event-option" onclick="selectEventType('חתונה','💒',false)">חתונה</div>
+            <div class="event-option" onclick="selectEventType('ברית','👶',false)">ברית / בריתה</div>
+            <div class="event-option" onclick="selectEventType('בר מצווה','✡️',false)">בר מצווה / בת מצווה</div>
+            <div class="event-option" onclick="selectEventType('הולדת תינוק','🍼',false)">הולדת תינוק/ת</div>
+          </div>
+        </div>
+
+        <div class="topic-block">
+          <div class="topic-title" onclick="toggleTopic('education')">🎓 לימודים והתפתחות <span class="arrow">▼</span></div>
+          <div class="topic-events" id="education" style="display:none;">
+            <div class="event-option" onclick="selectEventType('סיום לימודים','🎓',false)">סיום לימודים / תואר / קורס</div>
+            <div class="event-option" onclick="selectEventType('קבלה ללימודים','📚',false)">קבלה ללימודים</div>
+          </div>
+        </div>
+
+        <div class="topic-block">
+          <div class="topic-title" onclick="toggleTopic('career')">💼 עבודה וקריירה <span class="arrow">▼</span></div>
+          <div class="topic-events" id="career" style="display:none;">
+            <div class="event-option" onclick="selectEventType('קידום','🚀',false)">קידום</div>
+            <div class="event-option" onclick="selectEventType('עבודה חדשה','🏢',false)">התחלת עבודה חדשה</div>
+            <div class="event-option" onclick="selectEventType('פתיחת עסק','🏪',false)">פתיחת עסק / השקה</div>
+            <div class="event-option" onclick="selectEventType('פרישה','🌅',false)">פרישה</div>
+          </div>
+        </div>
+
+        <div class="topic-block">
+          <div class="topic-title" onclick="toggleTopic('home')">🏠 בית וחיים <span class="arrow">▼</span></div>
+          <div class="topic-events" id="home" style="display:none;">
+            <div class="event-option" onclick="selectEventType('מעבר דירה','📦',false)">מעבר דירה / קניית בית</div>
+            <div class="event-option" onclick="selectEventType('חנוכת בית','🏡',false)">חנוכת בית</div>
+          </div>
+        </div>
+
+        <div class="topic-block">
+          <div class="topic-title" onclick="toggleTopic('personal')">🏆 הישגים אישיים <span class="arrow">▼</span></div>
+          <div class="topic-events" id="personal" style="display:none;">
+            <div class="event-option" onclick="selectEventType('זכייה','🏆',false)">זכייה / פרס / הוקרה</div>
+            <div class="event-option" onclick="selectEventType('הישג ספורטיבי','🏅',false)">הישג ספורטיבי</div>
+            <div class="event-option" onclick="selectEventType('ציון דרך אישי','⭐',false)">ציון דרך אישי</div>
+          </div>
+        </div>
+
+        <div class="topic-block">
+          <div class="topic-title" onclick="toggleTopic('holidays')">🕍 חגי ישראל <span class="arrow">▼</span></div>
+          <div class="topic-events" id="holidays" style="display:none;">
+            <div class="event-option" onclick="selectEventType('ראש השנה','🍎',false)">ראש השנה</div>
+            <div class="event-option" onclick="selectEventType('יום כיפור','🤍',false)">יום כיפור</div>
+            <div class="event-option" onclick="selectEventType('סוכות','🌿',false)">סוכות</div>
+            <div class="event-option" onclick="selectEventType('חנוכה','🕎',false)">חנוכה</div>
+            <div class="event-option" onclick="selectEventType('פורים','🎭',false)">פורים</div>
+            <div class="event-option" onclick="selectEventType('פסח','🫓',false)">פסח</div>
+            <div class="event-option" onclick="selectEventType('שבועות','📜',false)">שבועות</div>
+            <div class="event-option" onclick="selectEventType('שבת','🕯️',false)">שבת</div>
+          </div>
+        </div>
+
+        <div class="topic-block">
+          <div class="topic-title" onclick="toggleTopic('other')">🎊 כללי <span class="arrow">▼</span></div>
+          <div class="topic-events" id="other" style="display:none;">
+            <div class="event-option" onclick="selectEventType('אירוע שמח','🎊',false)">אירוע שמח אחר</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- שלב ב: פרטי האירוע -->
+      <div id="detailsStep" style="display:none;">
+        <div class="selected-type-badge" id="selectedTypeBadge"></div>
+
+        <div class="onboard-field">
+          <label>שם החוגג/ת</label>
+          <input type="text" id="celebrantName" placeholder="שם פרטי" maxlength="30" />
+        </div>
+
+        <div class="onboard-field">
+          <label>תאריך האירוע</label>
+          <input type="date" id="eventDate" />
+        </div>
+
+        <div class="onboard-field" id="recurringField" style="display:none;">
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+            <input type="checkbox" id="recurringCheck" checked style="width:20px; height:20px; accent-color:var(--gold);" />
+            להזכיר לי כל שנה
+          </label>
+        </div>
+
+        <button class="onboard-btn" onclick="saveEvent()">שמירת אירוע ✓</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ONBOARDING OVERLAY -->
+  <div id="onboarding" style="display:none;">
+    <div class="onboard-wrap">
+
+      <!-- שלב 1: ברוך הבא -->
+      <div class="onboard-step" id="step1">
+        <div class="onboard-emoji">👋</div>
+        <h1>ברוך הבא!</h1>
+        <p>Greeting Buddy עוזר לך לא לשכוח אירועים חשובים - ולא להיתקע עם מה לכתוב 😊</p>
+        <p style="margin-top:12px; font-size:14px; color:#78716C; line-height:1.7;">שמרו אירועים חשובים - ימי הולדת, חתונות, חגים ועוד.<br>אנחנו נתזכר אותך לפני האירוע ונעזור לך לכתוב ברכה אישית מוכנה לשליחה בוואטסאפ 🎉</p>
+        <button class="onboard-btn" onclick="goStep(2)">מתחילים!</button>
+      </div>
+
+      <!-- שלב 2: שם ומגדר -->
+      <div class="onboard-step" id="step2" style="display:none;">
+        <div class="onboard-emoji">😊</div>
+        <h1>קצת עליך</h1>
+        <div class="onboard-field">
+          <label>השם שלי</label>
+          <input type="text" id="userName" placeholder="שם פרטי" maxlength="20" />
+        </div>
+        <div class="onboard-field">
+          <label>אני</label>
+          <div class="gender-btns">
+            <button class="gender-btn" id="genderMale" onclick="setGender('male')">גבר</button>
+            <button class="gender-btn" id="genderFemale" onclick="setGender('female')">אישה</button>
+          </div>
+        </div>
+        <button class="onboard-btn" onclick="goStep(3)">מתחילים</button>
+      </div>
+
+      <!-- שלב 3: הגדרות תזכורת -->
+      <div class="onboard-step" id="step3" style="display:none;">
+        <div class="onboard-emoji">🔔</div>
+        <h1>תזכורות</h1>
+        <p id="reminderStepText">באיזו שעה ביום האירוע תרצה לקבל תזכורת?</p>
+        <div class="onboard-field">
+          <label>שעת התזכורת</label>
+          <select id="reminderTime">
+            <option value="07:00">07:00</option>
+            <option value="08:00">08:00</option>
+            <option value="09:00" selected>09:00</option>
+            <option value="10:00">10:00</option>
+            <option value="11:00">11:00</option>
+            <option value="12:00">12:00</option>
+          </select>
+        </div>
+        <button class="onboard-btn" onclick="goStep(4)">המשך</button>
+      </div>
+
+      <!-- שלב 4: אישור התראות -->
+      <div class="onboard-step" id="step4" style="display:none;">
+        <div class="onboard-emoji">🎉</div>
+        <h1>כמעט סיימנו!</h1>
+        <p>כדי שנוכל להזכיר לך לפני אירועים - אנחנו צריכים את רשותך לשלוח התראות.</p>
+        <button class="onboard-btn" onclick="requestNotifications()">אישור התראות</button>
+        <button class="onboard-skip" onclick="finishOnboarding()">דלג על זה</button>
+      </div>
+
+    </div>
+  </div>
+
+  <header class="app-header">
+    <div class="header-top">
+      <div class="app-logo">Greeting Buddy</div>
+      <button class="settings-btn" onclick="openSettings()" style="background:rgba(0,0,0,0.35); font-size:22px; border: 2px solid rgba(255,255,255,0.6);">⚙️</button>
+    </div>
+    <div class="header-greeting">שלום 👋</div>
+  </header>
+
+  <main class="main-content">
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState">
+      <span class="emoji">🎉</span>
+      <h2>אין אירועים עדיין</h2>
+      <p>הוסף אירועים חשובים ואנחנו<br>נזכיר לך בזמן ונעזור לך עם הברכה!</p>
+    </div>
+
+    <!-- Event List -->
+    <div id="eventList" style="display:none;">
+      <div class="section-title">האירועים שלי</div>
+      <div id="eventsContainer"></div>
+    </div>
+
+  </main>
+
+  <button class="fab" id="addEventBtn" onclick="showAddEvent()">＋ הוספת אירוע</button>
+  <!-- כפתור איפוס - למפתח בלבד, להסיר לפני השקה -->
+  <button onclick="localStorage.clear(); location.reload();" style="position:fixed; bottom:24px; left:16px; background:#EF4444; color:white; border:none; border-radius:20px; padding:10px 16px; font-family:Heebo,sans-serif; font-size:13px; font-weight:700; cursor:pointer; z-index:999;">🔄 איפוס</button>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+
+    // Onboarding Logic
+    let selectedGender = '';
+
+    function initApp() {
+      const user = JSON.parse(localStorage.getItem('gb_user') || 'null');
+      if (!user) {
+        document.getElementById('onboarding').style.display = 'flex';
+      } else {
+        const isFemale = user.gender === 'female';
+        document.querySelector('.header-greeting').textContent = 'שלום ' + user.firstName + ' 👋';
+        updateGenderTexts(isFemale);
+      }
+    }
+
+    function updateGenderTexts(isFemale) {
+      const reminderLabel = document.getElementById('reminderStepText');
+      if (reminderLabel) reminderLabel.textContent = isFemale ? 'באיזו שעה ביום האירוע תרצי לקבל תזכורת?' : 'באיזו שעה ביום האירוע תרצה לקבל תזכורת?';
+
+      const wishLabels = document.querySelectorAll('#questionnaireStep .onboard-field label');
+      wishLabels.forEach(label => {
+        if (label.textContent.includes('תרצה') || label.textContent.includes('תרצי')) {
+          label.innerHTML = isFemale ? 'דבר אחד שתרצי לאחל / לציין <span class="required">*</span>' : 'דבר אחד שתרצה לאחל / לציין <span class="required">*</span>';
+        }
+      });
+
+      const emptyStateP = document.querySelector('#emptyState p');
+      if (emptyStateP) emptyStateP.innerHTML = isFemale ? 'הוסיפי אירועים חשובים ואנחנו<br>נזכיר לך בזמן ונעזור לך עם הברכה!' : 'הוסף אירועים חשובים ואנחנו<br>נזכיר לך בזמן ונעזור לך עם הברכה!';
+    }
+
+    function goStep(n) {
+      if (n === 3) {
+        const name = document.getElementById('userName').value.trim();
+        if (!name) { alert('נא להכניס שם'); return; }
+        if (!selectedGender) { alert('נא לבחור מגדר'); return; }
+      }
+      document.querySelectorAll('.onboard-step').forEach(s => s.style.display = 'none');
+      document.getElementById('step' + n).style.display = 'block';
+      if (n === 3) {
+        const isFemale = selectedGender === 'female';
+        document.getElementById('reminderQuestion').textContent = isFemale ? 'מתי תרצי לקבל תזכורת לפני אירוע?' : 'מתי תרצה לקבל תזכורת לפני אירוע?';
+      }
+    }
+
+    function setGender(g) {
+      selectedGender = g;
+      document.getElementById('genderMale').classList.toggle('active', g === 'male');
+      document.getElementById('genderFemale').classList.toggle('active', g === 'female');
+    }
+
+    function requestNotifications() {
+      Notification.requestPermission().then(() => finishOnboarding());
+    }
+
+    function finishOnboarding() {
+      const user = {
+        firstName: document.getElementById('userName').value.trim(),
+        gender: selectedGender,
+        reminderTime: document.getElementById('reminderTime').value,
+        reminderFollowupHours: 3
+      };
+      localStorage.setItem('gb_user', JSON.stringify(user));
+      document.getElementById('onboarding').style.display = 'none';
+      showInstallScreen();
+      document.querySelector('.header-greeting').textContent = 'שלום ' + user.firstName + ' 👋';
+      updateGenderTexts(user.gender === 'female');
+    }
+
+    initApp();
+
+    const sampleEvents = [];
+
+    function renderEvents() {
+      const events = JSON.parse(localStorage.getItem('gb_events') || '[]');
+      const allEvents = events.length > 0 ? events : sampleEvents;
+
+      if (allEvents.length === 0) {
+        document.getElementById('emptyState').style.display = 'block';
+        document.getElementById('eventList').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('eventList').style.display = 'block';
+
+      // מיון לפי תאריך
+      allEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      const container = document.getElementById('eventsContainer');
+      container.innerHTML = '';
+
+      allEvents.forEach(event => {
+        const today = new Date();
+        const eventDate = new Date(event.date);
+        const diffDays = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+
+        const daysText = diffDays < 0 ? 'עבר' : diffDays === 0 ? 'היום! 🎉' : `עוד ${diffDays} ימים`;
+        const isSoon = diffDays <= 7 && diffDays >= 0;
+
+        const dateStr = eventDate.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+
+        container.innerHTML += `
+          <div class="event-card" onclick="openEvent(${event.id})">
+            <div class="event-icon">${event.emoji}</div>
+            <div class="event-info">
+              <div class="event-title">${event.type} ${event.name}</div>
+              <div class="event-date">${dateStr}</div>
+            </div>
+            <div class="event-days ${isSoon ? 'soon' : ''}">${daysText}</div>
+          </div>
+        `;
+      });
+    }
+
+    // Event Details
+    let currentEventId = null;
+
+    function openEvent(id) {
+      const events = JSON.parse(localStorage.getItem('gb_events') || '[]');
+      const event = events.find(e => e.id === id);
+      if (!event) return;
+
+      currentEventId = id;
+
+      document.getElementById('detailsTitle').textContent = event.type + ' ' + event.name;
+      document.getElementById('detailsEmoji').textContent = event.emoji;
+      document.getElementById('detailsType').textContent = event.type;
+      document.getElementById('detailsName').textContent = event.name;
+
+      const eventDate = new Date(event.date);
+      const today = new Date();
+      const diffDays = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+      const dateStr = eventDate.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      document.getElementById('detailsDate').textContent = dateStr;
+      document.getElementById('detailsDaysLeft').textContent =
+        diffDays < 0 ? 'עבר' : diffDays === 0 ? 'היום! 🎉' : 'עוד ' + diffDays + ' ימים';
+
+      const recurringRow = document.getElementById('detailsRecurringRow');
+      recurringRow.style.display = event.recurring ? 'flex' : 'none';
+
+      // הסתר כפתור צף ומסך בית
+      document.getElementById('addEventBtn').style.display = 'none';
+      document.querySelector('.app-header').style.display = 'none';
+      document.querySelector('.main-content').style.display = 'none';
+
+      document.getElementById('eventDetailsScreen').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function closeEventDetails() {
+      document.getElementById('eventDetailsScreen').style.display = 'none';
+      // החזר כפתור צף ומסך בית
+      document.getElementById('addEventBtn').style.display = 'flex';
+      document.querySelector('.app-header').style.display = 'block';
+      document.querySelector('.main-content').style.display = 'block';
+      currentEventId = null;
+      window.scrollTo(0, 0);
+    }
+
+    function deleteEvent() {
+      if (!confirm('למחוק את האירוע?')) return;
+      let events = JSON.parse(localStorage.getItem('gb_events') || '[]');
+      events = events.filter(e => e.id !== currentEventId);
+      localStorage.setItem('gb_events', JSON.stringify(events));
+      closeEventDetails();
+      renderEvents();
+    }
+
+    // Edit & Cancel Event
+    let confirmAction = null;
+
+    function openEditEvent() {
+      const events = JSON.parse(localStorage.getItem('gb_events') || '[]');
+      const event = events.find(e => e.id === currentEventId);
+      if (!event) return;
+
+      document.getElementById('editEventBadge').textContent = event.emoji + ' ' + event.type + ' - ' + event.name;
+      document.getElementById('editEventDate').value = event.date;
+
+      document.getElementById('eventDetailsScreen').style.display = 'none';
+      document.getElementById('editEventScreen').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function closeEditEvent() {
+      document.getElementById('editEventScreen').style.display = 'none';
+      document.getElementById('eventDetailsScreen').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function confirmSaveEdit() {
+      const newDate = document.getElementById('editEventDate').value;
+      if (!newDate) { alert('נא לבחור תאריך'); return; }
+
+      showConfirm(
+        '💾',
+        'לשמור שינויים?',
+        'התאריך החדש יישמר',
+        () => {
+          let events = JSON.parse(localStorage.getItem('gb_events') || '[]');
+          events = events.map(e => {
+            if (e.id === currentEventId) e.date = newDate;
+            return e;
+          });
+          localStorage.setItem('gb_events', JSON.stringify(events));
+          closeEditEvent();
+          openEvent(currentEventId);
+          showToast('בוצע! ✓');
+        }
+      );
+    }
+
+    function confirmCancelEvent() {
+      showConfirm(
+        '🗑️',
+        'לבטל את האירוע?',
+        'האירוע יימחק לצמיתות',
+        () => {
+          let events = JSON.parse(localStorage.getItem('gb_events') || '[]');
+          events = events.filter(e => e.id !== currentEventId);
+          localStorage.setItem('gb_events', JSON.stringify(events));
+          closeEventDetails();
+          renderEvents();
+        }
+      );
+    }
+
+    function showConfirm(emoji, title, text, onYes) {
+      confirmAction = onYes;
+      document.getElementById('confirmEmoji').textContent = emoji;
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmText').textContent = text;
+      document.getElementById('confirmDialog').style.display = 'flex';
+    }
+
+    function confirmYes() {
+      document.getElementById('confirmDialog').style.display = 'none';
+      if (confirmAction) confirmAction();
+      confirmAction = null;
+    }
+
+    function confirmNo() {
+      document.getElementById('confirmDialog').style.display = 'none';
+      confirmAction = null;
+      // אם היינו במסך עריכה - חזור לפרטי האירוע
+      if (document.getElementById('editEventScreen').style.display === 'block') {
+        closeEditEvent();
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.createElement('div');
+      toast.textContent = msg;
+      toast.style.cssText = 'position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#1C1917; color:white; padding:12px 24px; border-radius:20px; font-family:Heebo,sans-serif; font-size:15px; font-weight:700; z-index:3000; animation:fadeIn 0.3s ease;';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    }
+
+    // Greeting Logic
+    let greetingAnswers = {};
+    let currentEventForGreeting = null;
+
+    function startGreeting() {
+      const events = JSON.parse(localStorage.getItem('gb_events') || '[]');
+      currentEventForGreeting = events.find(e => e.id === currentEventId);
+      if (!currentEventForGreeting) return;
+
+      greetingAnswers = {};
+      document.getElementById('greetingEventBadge').textContent =
+        currentEventForGreeting.emoji + ' ' + currentEventForGreeting.type + ' - ' + currentEventForGreeting.name;
+
+      // איפוס שאלון
+      document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+      document.getElementById('mainWish').value = '';
+      document.getElementById('ageHint').value = '';
+      document.getElementById('hobbyHint').value = '';
+      document.getElementById('traitHint').value = '';
+      document.getElementById('optionalFields').style.display = 'none';
+
+      document.getElementById('questionnaireStep').style.display = 'block';
+      document.getElementById('styleStep').style.display = 'none';
+
+      // הסתר מסך פרטים
+      document.getElementById('eventDetailsScreen').style.display = 'none';
+      document.getElementById('greetingScreen').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function closeGreeting() {
+      document.getElementById('greetingScreen').style.display = 'none';
+      document.getElementById('eventDetailsScreen').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function selectOption(btn, field, value) {
+      const group = btn.closest('.options-grid');
+      group.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      greetingAnswers[field] = value;
+    }
+
+    function selectSign(type) {
+      const btns = document.querySelectorAll('#signOptions .option-btn');
+      btns.forEach(b => b.classList.remove('selected'));
+      event.target.classList.add('selected');
+      greetingAnswers.sign = type;
+      document.getElementById('familyNameField').style.display = 'block';
+      document.getElementById('familyName').focus();
+    }
+
+    function toggleOptional() {
+      const el = document.getElementById('optionalFields');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function goToStyle() {
+      if (!greetingAnswers.relation) { alert('נא לבחור את הקשר'); return; }
+      if (!document.getElementById('mainWish').value.trim()) { alert('נא למלא איחול'); return; }
+
+      greetingAnswers.mainWish = document.getElementById('mainWish').value.trim();
+      greetingAnswers.sign = document.getElementById('signText').value.trim();
+
+      if (!greetingAnswers.sign) { alert('נא למלא חתימה'); return; }
+      greetingAnswers.age = document.getElementById('ageHint').value.trim();
+      greetingAnswers.hobby = document.getElementById('hobbyHint').value.trim();
+      greetingAnswers.trait = document.getElementById('traitHint').value.trim();
+
+      document.getElementById('questionnaireStep').style.display = 'none';
+      document.getElementById('styleStep').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function backToQuestionnaire() {
+      document.getElementById('styleStep').style.display = 'none';
+      document.getElementById('questionnaireStep').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function quickGreeting() {
+      greetingAnswers.relation = 'מכר/ה';
+      greetingAnswers.mainWish = 'כל טוב';
+      greetingAnswers.sign = 'שם פרטי';
+      greetingAnswers.tone = 'קליל';
+      greetingAnswers.length = 'קצר';
+      generateGreeting();
+    }
+
+    // Greeting Generation
+    let approvedGreeting = '';
+
+    function generateGreeting() {
+      if (!greetingAnswers.tone) { alert('נא לבחור טון'); return; }
+      if (!greetingAnswers.length) { alert('נא לבחור אורך'); return; }
+
+      // הסתר מסך שאלון, פתח מסך תוצאה
+      document.getElementById('greetingScreen').style.display = 'none';
+      document.getElementById('greetingResultScreen').style.display = 'block';
+      document.getElementById('loadingGreeting').style.display = 'block';
+      document.getElementById('greetingResult').style.display = 'none';
+      document.getElementById('rewriteOptions').style.display = 'none';
+      window.scrollTo(0, 0);
+
+      callClaudeAPI();
+    }
+
+    async function callClaudeAPI(direction = '') {
+      const event = currentEventForGreeting;
+      const a = greetingAnswers;
+
+      const lengthGuide = a.length === 'קצר' ? '2-3 שורות' : a.length === 'בינוני' ? 'פסקה אחת' : 'שתי פסקאות';
+
+      let prompt = `כתוב ברכה בעברית לאירוע "${event.type}" עבור ${event.name}.
+קשר: ${a.relation}
+טון: ${a.tone}
+אורך: ${lengthGuide}
+איחול מרכזי: ${a.mainWish}`;
+
+      if (a.age) prompt += `\nגיל: ${a.age}`;
+      if (a.hobby) prompt += `\nתחביב: ${a.hobby}`;
+      if (a.trait) prompt += `\nתכונה: ${a.trait}`;
+      if (a.sign === 'שם פרטי') prompt += `\nחתום בסוף עם: בברכה`;
+      if (a.sign === 'בלי חתימה') prompt += `\nאל תוסיף חתימה`;
+      if (direction) prompt += `\nגרסה זו צריכה להיות: ${direction}`;
+
+      prompt += `\n\nכתוב רק את הברכה עצמה, ללא הסברים.`;
+
+      try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 500,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+
+        const data = await response.json();
+        const text = data.content[0].text;
+
+        approvedGreeting = text;
+        document.getElementById('greetingText').textContent = text;
+        document.getElementById('loadingGreeting').style.display = 'none';
+        document.getElementById('greetingResult').style.display = 'block';
+
+      } catch (err) {
+        // פולבק - ברכה מקומית אם ה-API לא עובד
+        const fallback = `מזל טוב ${event.name}! 🎉\n\nביום מיוחד זה, ${a.mainWish}.\nיהיה לך יום נפלא!`;
+        approvedGreeting = fallback;
+        document.getElementById('greetingText').textContent = fallback;
+        document.getElementById('loadingGreeting').style.display = 'none';
+        document.getElementById('greetingResult').style.display = 'block';
+      }
+    }
+
+    function closeGreetingResult() {
+      document.getElementById('greetingResultScreen').style.display = 'none';
+      document.getElementById('greetingScreen').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function showRewriteOptions() {
+      document.getElementById('rewriteOptions').style.display = 'block';
+    }
+
+    function rewriteGreeting(direction) {
+      document.getElementById('greetingResult').style.display = 'none';
+      document.getElementById('loadingGreeting').style.display = 'block';
+      document.getElementById('rewriteOptions').style.display = 'none';
+      callClaudeAPI(direction);
+    }
+
+    function approveGreeting() {
+      // סמן שברכה הוכנה
+      let events = JSON.parse(localStorage.getItem('gb_events') || '[]');
+      events = events.map(e => {
+        if (e.id === currentEventId) e.greetingPrepared = true;
+        return e;
+      });
+      localStorage.setItem('gb_events', JSON.stringify(events));
+
+      // הסתר כפתורי אישור/כתיבה מחדש, הצג כפתורי שליחה
+      document.querySelector('.result-actions').style.display = 'none';
+      document.getElementById('rewriteOptions').style.display = 'none';
+      document.getElementById('afterApproval').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    // Install Screen
+    let androidInstallPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      androidInstallPrompt = e;
+    });
+
+    function showInstallScreen() {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+      // אם כבר מותקן - דלג
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        skipInstall();
+        return;
+      }
+
+      document.getElementById('installScreen').style.display = 'flex';
+
+      if (isIOS) {
+        document.getElementById('androidInstall').style.display = 'none';
+        document.getElementById('iosInstall').style.display = 'block';
+      } else {
+        document.getElementById('androidInstall').style.display = 'block';
+        document.getElementById('iosInstall').style.display = 'none';
+      }
+    }
+
+    async function installAndroid() {
+      if (androidInstallPrompt) {
+        androidInstallPrompt.prompt();
+        const { outcome } = await androidInstallPrompt.userChoice;
+        androidInstallPrompt = null;
+      }
+      skipInstall();
+    }
+
+    function skipInstall() {
+      document.getElementById('installScreen').style.display = 'none';
+      renderEvents();
+    }
+
+    // Settings
+    let settingsGender = '';
+
+    function openSettings() {
+      const user = JSON.parse(localStorage.getItem('gb_user') || 'null');
+      if (!user) return;
+
+      document.getElementById('settingsName').value = user.firstName || '';
+      settingsGender = user.gender || '';
+      document.getElementById('settingsGenderMale').classList.toggle('active', settingsGender === 'male');
+      document.getElementById('settingsGenderFemale').classList.toggle('active', settingsGender === 'female');
+      document.getElementById('settingsReminderTime').value = user.reminderTime || '09:00';
+
+      // הסתר מסך בית
+      document.getElementById('addEventBtn').style.display = 'none';
+      document.querySelector('.app-header').style.display = 'none';
+      document.querySelector('.main-content').style.display = 'none';
+      document.getElementById('settingsScreen').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsScreen').style.display = 'none';
+      document.getElementById('addEventBtn').style.display = 'flex';
+      document.querySelector('.app-header').style.display = 'block';
+      document.querySelector('.main-content').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function setSettingsGender(g) {
+      settingsGender = g;
+      document.getElementById('settingsGenderMale').classList.toggle('active', g === 'male');
+      document.getElementById('settingsGenderFemale').classList.toggle('active', g === 'female');
+    }
+
+    function saveSettings() {
+      const name = document.getElementById('settingsName').value.trim();
+      if (!name) { alert('נא להכניס שם'); return; }
+      if (!settingsGender) { alert('נא לבחור מגדר'); return; }
+
+      const user = JSON.parse(localStorage.getItem('gb_user') || '{}');
+      user.firstName = name;
+      user.gender = settingsGender;
+      user.reminderTime = document.getElementById('settingsReminderTime').value;
+      user.reminderFollowupHours = 3;
+      localStorage.setItem('gb_user', JSON.stringify(user));
+
+      document.querySelector('.header-greeting').textContent = 'שלום ' + name + ' 👋';
+      closeSettings();
+      alert('ההגדרות נשמרו! ✓');
+    }
+
+    // Greeting Card
+    let selectedTemplate = 1;
+    let selectedColor = '#F59E0B';
+
+    function openGreetingCard() {
+      document.getElementById('greetingResultScreen').style.display = 'none';
+      document.getElementById('greetingCardScreen').style.display = 'block';
+      document.getElementById('cardDesignStep').style.display = 'block';
+      document.getElementById('cardPreviewStep').style.display = 'none';
+      window.scrollTo(0, 0);
+    }
+
+    function closeGreetingCard() {
+      document.getElementById('greetingCardScreen').style.display = 'none';
+      document.getElementById('greetingResultScreen').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function selectTemplate(n) {
+      selectedTemplate = n;
+      document.querySelectorAll('.template-option').forEach(t => t.classList.remove('selected'));
+      document.getElementById('tpl' + n).classList.add('selected');
+    }
+
+    function selectColor(color, el) {
+      selectedColor = color;
+      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function backToCardDesign() {
+      document.getElementById('cardPreviewStep').style.display = 'none';
+      document.getElementById('cardDesignStep').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function previewCard() {
+      if (!selectedTemplate) { alert('נא לבחור תבנית'); return; }
+
+      const event = currentEventForGreeting;
+      const withEmojis = document.getElementById('emojisCheck').checked;
+      const emoji = withEmojis ? (event ? event.emoji : '🎉') : '';
+      const text = approvedGreeting;
+      const sign = greetingAnswers.sign || '';
+
+      const templates = {
+        1: `background:#fff; color:#1C1917; font-family:'Heebo',sans-serif; padding:32px; border-right:6px solid ${selectedColor};`,
+        2: `background:linear-gradient(135deg, #FEF3C7, #FDE68A); color:#1C1917; font-family:'Heebo',sans-serif; padding:32px; text-align:center;`,
+        3: `background:linear-gradient(135deg, ${selectedColor}, #F97316); color:#fff; font-family:'Heebo',sans-serif; padding:32px; text-align:center;`,
+        4: `background:#F0FDF4; color:#1C1917; font-family:'Heebo',sans-serif; padding:32px; border:3px dashed ${selectedColor};`,
+        5: `background:linear-gradient(135deg, #1C1917, #44403C); color:#fff; font-family:'Heebo',sans-serif; padding:32px; text-align:center;`
+      };
+
+      document.getElementById('cardCanvas').innerHTML = `
+        <div style="${templates[selectedTemplate]}">
+          ${emoji ? `<div style="font-size:48px; margin-bottom:12px;">${emoji}</div>` : ''}
+          <div style="font-size:16px; line-height:1.8; white-space:pre-wrap;">${text}</div>
+          ${sign ? `<div style="margin-top:16px; font-weight:700; color:${selectedColor};">${sign}</div>` : ''}
+        </div>
+      `;
+
+      document.getElementById('cardDesignStep').style.display = 'none';
+      document.getElementById('cardPreviewStep').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function shareCard() {
+      const event = currentEventForGreeting;
+      const appLink = 'https://dadi-attas.github.io/greeting-buddy/';
+      const name = event ? event.name : '';
+
+      const eventType = event ? event.type : 'האירוע';
+      const message = `הי ${name},\nהיה לי חשוב לברך אותך לרגל ${eventType} 😊\n\n${approvedGreeting}\n\nהופק על ידי Greeting Buddy – מוזמן לנסות:\n${appLink}`;
+      const encoded = encodeURIComponent(message);
+      window.open('https://wa.me/?text=' + encoded, '_blank');
+    }
+
+    function sendAsText() {
+      const event = currentEventForGreeting;
+      const appLink = 'https://dadi-attas.github.io/greeting-buddy/';
+      const name = event ? event.name : '';
+
+      const eventType = event ? event.type : 'האירוע';
+      const message = `הי ${name},\nהיה לי חשוב לברך אותך לרגל ${eventType}\n\n${approvedGreeting}\n\nהופק על ידי Greeting Buddy - מוזמן לנסות:\n${appLink}`;
+
+      const encoded = encodeURIComponent(message);
+      window.open('https://wa.me/?text=' + encoded, '_blank');
+    }
+
+    // Add Event Logic
+    let currentEventType = '';
+    let currentEventEmoji = '';
+    let isRecurring = true;
+
+    function showAddEvent() {
+      document.getElementById('addEventScreen').style.display = 'block';
+      showTopicsStep();
+    }
+
+    function closeAddEvent() {
+      document.getElementById('addEventScreen').style.display = 'none';
+    }
+
+    function toggleTopic(id) {
+      const el = document.getElementById(id);
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function showTopicsStep() {
+      document.getElementById('topicsStep').style.display = 'block';
+      document.getElementById('detailsStep').style.display = 'none';
+    }
+
+    function selectEventType(type, emoji, recurring) {
+      currentEventType = type;
+      currentEventEmoji = emoji;
+      isRecurring = recurring;
+      document.getElementById('selectedTypeBadge').textContent = emoji + ' ' + type;
+      // הצג צ'קבוקס רק ליום הולדת ויום נישואים
+      const showRecurring = (type === 'יום הולדת' || type === 'יום נישואים');
+      document.getElementById('recurringField').style.display = showRecurring ? 'block' : 'none';
+      if (showRecurring) document.getElementById('recurringCheck').checked = true;
+      document.getElementById('topicsStep').style.display = 'none';
+      document.getElementById('detailsStep').style.display = 'block';
+      document.getElementById('celebrantName').value = '';
+      document.getElementById('eventDate').value = '';
+    }
+
+    function saveEvent() {
+      const name = document.getElementById('celebrantName').value.trim();
+      const date = document.getElementById('eventDate').value;
+      if (!name) { alert('נא להכניס שם'); return; }
+      if (!date) { alert('נא לבחור תאריך'); return; }
+
+      const recurringVisible = document.getElementById('recurringField').style.display !== 'none';
+      const recurring = recurringVisible ? document.getElementById('recurringCheck').checked : false;
+
+      const events = JSON.parse(localStorage.getItem('gb_events') || '[]');
+      events.push({
+        id: Date.now(),
+        type: currentEventType,
+        name: name,
+        emoji: currentEventEmoji,
+        date: date,
+        recurring: recurring,
+        greetingPrepared: false
+      });
+      localStorage.setItem('gb_events', JSON.stringify(events));
+
+      closeAddEvent();
+      renderEvents();
+    }
+
+    function smartBack() {
+      const detailsVisible = document.getElementById('detailsStep').style.display !== 'none';
+      if (detailsVisible) {
+        showTopicsStep();
+      } else {
+        closeAddEvent();
+      }
+    }
+
+    // הפעל בטעינה
+    renderEvents();
+  </script>
+
+</body>
+</html>
