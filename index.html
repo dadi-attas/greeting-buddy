@@ -2218,6 +2218,61 @@
       }
     }
 
+    async function showCardFromUrl(cardId) {
+      console.log('Card ID:', cardId);
+
+      // המתן לפיירבייס להיות מוכן
+      let waited = 0;
+      while (!window.db && waited < 5000) {
+        await new Promise(r => setTimeout(r, 100));
+        waited += 100;
+      }
+
+      document.body.innerHTML = `
+        <div style="
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--cream);
+          font-family: 'Heebo', sans-serif;
+          padding: 20px;
+        ">
+          <div id="card-container" style="text-align: center;">
+            <p>טוען כרטיס...</p>
+          </div>
+        </div>
+      `;
+
+      try {
+        const docRef = window.firestoreDoc(window.db, 'cards', cardId);
+        const docSnap = await window.firestoreGetDoc(docRef);
+
+        if (docSnap.exists()) {
+          const card = docSnap.data();
+          document.getElementById('card-container').innerHTML = `
+            <div style="
+              background: white;
+              border-radius: 24px;
+              padding: 40px;
+              max-width: 380px;
+              box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+              direction: rtl;
+            ">
+              <div style="font-size: 64px; margin-bottom: 16px;">${card.eventEmoji}</div>
+              <h2 style="margin-bottom: 24px; color: #333;">${card.eventName}</h2>
+              <p style="font-size: 18px; line-height: 1.8; color: #555;">${card.greeting}</p>
+              <p style="margin-top: 24px; font-size: 12px; color: #aaa;">נשלח דרך Greeting Buddy 💌</p>
+            </div>
+          `;
+        } else {
+          document.getElementById('card-container').innerHTML = '<p>הכרטיס לא נמצא</p>';
+        }
+      } catch(e) {
+        document.getElementById('card-container').innerHTML = '<p>שגיאה בטעינת הכרטיס</p>';
+      }
+    }
+
     // הפעל בטעינה
     renderEvents();
   </script>
@@ -2288,62 +2343,6 @@
   await loadUserFromFirebase();
 </script>
 
-<script>
-async function showCardFromUrl(cardId) {
-  console.log('Card ID:', cardId);
-
-  // המתן לפיירבייס להיות מוכן
-  let waited = 0;
-  while (!window.db && waited < 5000) {
-    await new Promise(r => setTimeout(r, 100));
-    waited += 100;
-  }
-
-  document.body.innerHTML = `
-    <div style="
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--cream);
-      font-family: 'Heebo', sans-serif;
-      padding: 20px;
-    ">
-      <div id="card-container" style="text-align: center;">
-        <p>טוען כרטיס...</p>
-      </div>
-    </div>
-  `;
-
-  try {
-    const docRef = window.firestoreDoc(window.db, 'cards', cardId);
-    const docSnap = await window.firestoreGetDoc(docRef);
-
-    if (docSnap.exists()) {
-      const card = docSnap.data();
-      document.getElementById('card-container').innerHTML = `
-        <div style="
-          background: white;
-          border-radius: 24px;
-          padding: 40px;
-          max-width: 380px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-          direction: rtl;
-        ">
-          <div style="font-size: 64px; margin-bottom: 16px;">${card.eventEmoji}</div>
-          <h2 style="margin-bottom: 24px; color: #333;">${card.eventName}</h2>
-          <p style="font-size: 18px; line-height: 1.8; color: #555;">${card.greeting}</p>
-          <p style="margin-top: 24px; font-size: 12px; color: #aaa;">נשלח דרך Greeting Buddy 💌</p>
-        </div>
-      `;
-    } else {
-      document.getElementById('card-container').innerHTML = '<p>הכרטיס לא נמצא</p>';
-    }
-  } catch(e) {
-    document.getElementById('card-container').innerHTML = '<p>שגיאה בטעינת הכרטיס</p>';
-  }
-}
-</script>
 
 </body>
 </html>
