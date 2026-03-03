@@ -1467,6 +1467,11 @@
       if (!user) {
         document.getElementById('onboarding').style.display = 'flex';
       } else {
+        // הוסף userId אם אין
+        if (!user.userId) {
+          user.userId = 'user_' + Date.now();
+          localStorage.setItem('gb_user', JSON.stringify(user));
+        }
         const isFemale = user.gender === 'female';
         document.querySelector('.header-greeting').textContent = 'שלום ' + user.firstName + ' 👋';
         updateGenderTexts(isFemale);
@@ -1508,9 +1513,27 @@
       document.getElementById('genderFemale').classList.toggle('active', g === 'female');
     }
 
-    function requestNotifications() {
-      Notification.requestPermission().then(() => finishOnboarding());
+    async function requestNotifications() {
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      const token = await window.fcmGetToken(window.fcmMessaging, {
+        vapidKey: window.fcmVapidKey
+      });
+      const user = JSON.parse(localStorage.getItem('gb_user') || '{}');
+      user.fcmToken = token;
+      localStorage.setItem('gb_user', JSON.stringify(user));
+      if (window.saveToFirebase) window.saveToFirebase();
+      console.log('FCM Token:', token);
+      goStep(5);
+    } else {
+      goStep(5);
     }
+  } catch(e) {
+    console.log('FCM error:', e);
+    goStep(5);
+  }
+}
 
     function finishOnboarding() {
       const user = {
@@ -1520,6 +1543,9 @@
         reminderFollowupHours: 3
       };
       localStorage.setItem('gb_user', JSON.stringify(user));
+      user.userId = 'user_' + Date.now();
+      localStorage.setItem('gb_user', JSON.stringify(user));
+      if (window.saveToFirebase) window.saveToFirebase();
       document.getElementById('onboarding').style.display = 'none';
       showInstallScreen();
       document.querySelector('.header-greeting').textContent = 'שלום ' + user.firstName + ' 👋';
@@ -1824,6 +1850,13 @@
       callClaudeAPI();
     }
 
+    function displayGreeting(text) {
+      approvedGreeting = text;
+      document.getElementById('greetingText').textContent = text;
+      document.getElementById('loadingGreeting').style.display = 'none';
+      document.getElementById('greetingResult').style.display = 'block';
+    }
+
     async function callClaudeAPI(direction = '') {
       const event = currentEventForGreeting;
       const a = greetingAnswers;
@@ -1846,23 +1879,18 @@
       prompt += `\n\nכתוב רק את הברכה עצמה, ללא הסברים.`;
 
       try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
+        const response = await fetch('https://greeting-budy-api.dadiattas.workers.dev', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 500,
-            messages: [{ role: 'user', content: prompt }]
-          })
+          body: JSON.stringify({ prompt: prompt })
         });
 
         const data = await response.json();
-        const text = data.content[0].text;
-
-        approvedGreeting = text;
-        document.getElementById('greetingText').textContent = text;
-        document.getElementById('loadingGreeting').style.display = 'none';
-        document.getElementById('greetingResult').style.display = 'block';
+        if (data.greeting) {
+          displayGreeting(data.greeting);
+        } else {
+          throw new Error('No greeting returned');
+        }
 
       } catch (err) {
         // פולבק - ברכה מקומית אם ה-API לא עובד
@@ -2149,6 +2177,7 @@
         greetingPrepared: false
       });
       localStorage.setItem('gb_events', JSON.stringify(events));
+      if (window.saveToFirebase) window.saveToFirebase();
 
       closeAddEvent();
       renderEvents();
@@ -2166,6 +2195,72 @@
     // הפעל בטעינה
     renderEvents();
   </script>
+
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCzEAgtaObHrIxkVqPxtmH5tSAVJjMulew",
+    authDomain: "greeting-buddy.firebaseapp.com",
+    projectId: "greeting-buddy",
+    storageBucket: "greeting-buddy.firebasestorage.app",
+    messagingSenderId: "1040850875564",
+    appId: "1:1040850875564:web:e3d2658b94ec384d525b09"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  window.db = db;
+  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-messaging.js";
+  const messaging = getMessaging(app);
+  window.fcmMessaging = messaging;
+  window.fcmGetToken = getToken;
+  window.fcmVapidKey = 'BNNNJQs-oRh9-EptSO554dpgZueSPJXnRoqlTkEDhOcE8aCRFdWznmOFxcPiMyRiOHQMfUoSfHmQn7mEpzUtF3U';
+  window.firestoreDoc = doc;
+  window.firestoreSetDoc = setDoc;
+  window.firestoreGetDoc = getDoc;
+
+  // טען נתוני משתמש מפיירבייס
+  async function loadUserFromFirebase() {
+    const localUser = JSON.parse(localStorage.getItem('gb_user') || 'null');
+    if (!localUser || !localUser.userId) return;
+
+    try {
+      const docRef = doc(db, 'users', localUser.userId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.events) {
+          localStorage.setItem('gb_events', JSON.stringify(data.events));
+        }
+      }
+    } catch(e) {
+      console.log('Firebase load error:', e);
+    }
+  }
+
+  // שמור נתוני משתמש לפיירבייס
+  window.saveToFirebase = async function() {
+    const localUser = JSON.parse(localStorage.getItem('gb_user') || 'null');
+    if (!localUser || !localUser.userId) return;
+
+    const events = JSON.parse(localStorage.getItem('gb_events') || '[]');
+    try {
+      await setDoc(doc(db, 'users', localUser.userId), {
+        user: localUser,
+        events: events,
+        updatedAt: new Date().toISOString()
+      });
+      console.log('נשמר לפיירבייס!');
+    } catch(e) {
+      console.log('Firebase save error:', e);
+    }
+  };
+
+  await loadUserFromFirebase();
+</script>
 
 </body>
 </html>
