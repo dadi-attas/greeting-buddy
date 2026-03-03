@@ -1517,28 +1517,26 @@
   try {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-      const token = await window.fcmGetToken(window.fcmMessaging, {
-        vapidKey: window.fcmVapidKey
-      });
-      const user = JSON.parse(localStorage.getItem('gb_user') || '{}');
-      user.fcmToken = token;
-      localStorage.setItem('gb_user', JSON.stringify(user));
-      if (window.saveToFirebase) window.saveToFirebase();
-      console.log('FCM Token:', token);
-      const step5 = document.getElementById('step-5');
-      if (step5) goStep(5);
-      else showMainApp();
-    } else {
-      const step5 = document.getElementById('step-5');
-      if (step5) goStep(5);
-      else showMainApp();
+      try {
+        const token = await window.fcmGetToken(window.fcmMessaging, {
+          vapidKey: window.fcmVapidKey,
+          serviceWorkerRegistration: await navigator.serviceWorker.register('/greeting-buddy/firebase-messaging-sw.js')
+        });
+        const user = JSON.parse(localStorage.getItem('gb_user') || '{}');
+        user.fcmToken = token;
+        localStorage.setItem('gb_user', JSON.stringify(user));
+        if (window.saveToFirebase) window.saveToFirebase();
+        console.log('FCM Token:', token);
+      } catch(e) {
+        console.log('FCM Token error:', e);
+      }
     }
   } catch(e) {
-    console.log('FCM error:', e);
-    const step5 = document.getElementById('step-5');
-    if (step5) goStep(5);
-    else showMainApp();
+    console.log('Permission error:', e);
   }
+
+  // תמיד תמשיך הלאה בין אם יש שגיאה ובין אם לא
+  showMainApp();
 }
 
     function finishOnboarding() {
