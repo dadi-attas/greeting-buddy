@@ -1515,27 +1515,10 @@
 
     async function requestNotifications() {
   try {
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      try {
-        const token = await window.fcmGetToken(window.fcmMessaging, {
-          vapidKey: window.fcmVapidKey,
-          serviceWorkerRegistration: await navigator.serviceWorker.register('/greeting-buddy/firebase-messaging-sw.js')
-        });
-        const user = JSON.parse(localStorage.getItem('gb_user') || '{}');
-        user.fcmToken = token;
-        localStorage.setItem('gb_user', JSON.stringify(user));
-        if (window.saveToFirebase) window.saveToFirebase();
-        console.log('FCM Token:', token);
-      } catch(e) {
-        console.log('FCM Token error:', e);
-      }
-    }
+    await Notification.requestPermission();
   } catch(e) {
     console.log('Permission error:', e);
   }
-
-  // תמיד תמשיך הלאה בין אם יש שגיאה ובין אם לא
   initApp();
 }
 
