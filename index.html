@@ -2091,9 +2091,9 @@
     }
 
     async function shareCard() {
-  const greetingText = document.getElementById('greeting-text')?.innerText;
-  const eventName = currentEvent?.name || 'אירוע';
-  const eventEmoji = currentEvent?.emoji || '🎉';
+  const greetingText = document.getElementById('greetingText')?.innerText || approvedGreeting;
+  const eventName = currentEventForGreeting?.name || 'אירוע';
+  const eventEmoji = currentEventForGreeting?.emoji || '🎉';
 
   if (!greetingText) return;
 
