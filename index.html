@@ -2116,7 +2116,7 @@
 
     const cardUrl = `https://dadi-attas.github.io/greeting-buddy/?card=${cardId}`;
 
-    const message = `${eventEmoji} ${greetingText}\n\n🎴 לצפייה בכרטיס הברכה:\n${cardUrl}`;
+    const message = `🎴 כרטיס ברכה מיוחד עבורך:\n${cardUrl}\n\nהופק על ידי Greeting Buddy 💌`;
 
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -2288,6 +2288,15 @@
 
 <script>
 async function showCardFromUrl(cardId) {
+  console.log('Card ID:', cardId);
+
+  // המתן לפיירבייס להיות מוכן
+  let waited = 0;
+  while (!window.db && waited < 5000) {
+    await new Promise(r => setTimeout(r, 100));
+    waited += 100;
+  }
+
   document.body.innerHTML = `
     <div style="
       min-height: 100vh;
