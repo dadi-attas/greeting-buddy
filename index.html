@@ -1525,13 +1525,19 @@
       localStorage.setItem('gb_user', JSON.stringify(user));
       if (window.saveToFirebase) window.saveToFirebase();
       console.log('FCM Token:', token);
-      goStep(5);
+      const step5 = document.getElementById('step-5');
+      if (step5) goStep(5);
+      else showMainApp();
     } else {
-      goStep(5);
+      const step5 = document.getElementById('step-5');
+      if (step5) goStep(5);
+      else showMainApp();
     }
   } catch(e) {
     console.log('FCM error:', e);
-    goStep(5);
+    const step5 = document.getElementById('step-5');
+    if (step5) goStep(5);
+    else showMainApp();
   }
 }
 
