@@ -1464,6 +1464,8 @@
 
     function initApp() {
       // בדוק אם זה קישור לכרטיס
+      console.log('URL:', window.location.href);
+      console.log('Search:', window.location.search);
       const urlParams = new URLSearchParams(window.location.search);
       const cardId = urlParams.get('card');
       if (cardId) {
