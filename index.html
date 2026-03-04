@@ -2110,6 +2110,7 @@
       eventEmoji: eventEmoji,
       template: selectedTemplate || 1,
       color: selectedColor || '#F59E0B',
+      sign: greetingAnswers.sign || '',
       createdAt: new Date().toISOString()
     };
 
@@ -2274,6 +2275,7 @@
               <div style="font-size: 64px; margin-bottom: 16px;">${card.eventEmoji}</div>
               <h2 style="margin-bottom: 24px;">${card.eventName}</h2>
               <p style="font-size: 18px; line-height: 1.8;">${card.greeting}</p>
+              ${card.sign ? `<div style="margin-top:16px; font-weight:700; color:${color};">${card.sign}</div>` : ''}
               <p style="margin-top: 24px; font-size: 12px; opacity: 0.6;">נשלח דרך Greeting Buddy 💌</p>
             </div>
           `;
