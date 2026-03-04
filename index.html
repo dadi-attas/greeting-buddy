@@ -1266,12 +1266,9 @@
       </div>
 
       <!-- כפתורים - משתנים לפי מצב -->
-      <div id="installBtnsFirst" style="display:none; text-align:center;">
+      <div style="text-align:center;">
+        <button class="onboard-btn" onclick="markInstalled()" style="margin-bottom:12px;">✅ התקנתי, תודה!</button>
         <button class="onboard-skip" onclick="skipInstall()">דלג על זה</button>
-      </div>
-      <div id="installBtnsReturn" style="display:none; text-align:center;">
-        <button class="onboard-btn" onclick="markInstalled()" style="margin-bottom:12px;">✅ התקנתי - אל תשאל שוב</button>
-        <button class="onboard-skip" onclick="skipInstall()">אולי אחר כך</button>
       </div>
     </div>
   </div>
@@ -1973,10 +1970,6 @@
         skipInstall();
         return;
       }
-      const isFirstTime = !localStorage.getItem('gb_install_shown');
-      document.getElementById('installBtnsFirst').style.display = isFirstTime ? 'block' : 'none';
-      document.getElementById('installBtnsReturn').style.display = isFirstTime ? 'none' : 'block';
-      localStorage.setItem('gb_install_shown', 'true');
       document.getElementById('installScreen').style.display = 'block';
     }
 
@@ -1990,6 +1983,7 @@
     }
 
     function skipInstall() {
+      localStorage.removeItem('gb_installed');
       document.getElementById('installScreen').style.display = 'none';
       renderEvents();
     }
