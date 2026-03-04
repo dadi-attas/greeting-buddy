@@ -1506,6 +1506,7 @@
         const isFemale = user.gender === 'female';
         document.querySelector('.header-greeting').textContent = 'שלום ' + user.firstName + ' 👋';
         updateGenderTexts(isFemale);
+        showInstallScreen();
       }
     }
 
@@ -1970,7 +1971,15 @@
         skipInstall();
         return;
       }
-      document.getElementById('installScreen').style.display = 'block';
+      const el = document.getElementById('installScreen');
+      el.style.display = 'block';
+      el.style.position = 'fixed';
+      el.style.top = '0';
+      el.style.left = '0';
+      el.style.right = '0';
+      el.style.bottom = '0';
+      el.style.zIndex = '9999';
+      el.style.overflowY = 'auto';
     }
 
     async function installAndroid() {
