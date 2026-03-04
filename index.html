@@ -1206,49 +1206,73 @@
   </div>
 
   <!-- INSTALL SCREEN -->
-  <div id="installScreen" style="display:none; position:fixed; inset:0; background:var(--cream); z-index:1000; display:none; align-items:center; justify-content:center; padding:24px;">
-    <div style="width:100%; max-width:380px; text-align:center;">
-      <div style="font-size:64px; margin-bottom:16px;">📲</div>
-      <h2 style="font-size:24px; font-weight:700; margin-bottom:12px;">הוסף למסך הבית</h2>
-      <p style="font-size:15px; color:var(--text-mid); line-height:1.6; margin-bottom:28px;">
-        קבל גישה מהירה ל-Greeting Buddy ישירות ממסך הבית שלך
-      </p>
-
-      <!-- אנדרואיד -->
-      <div id="androidInstall">
-        <button class="onboard-btn" id="androidInstallBtn" onclick="installAndroid()">
-          ➕ הוסף למסך הבית
-        </button>
+  <div id="installScreen" style="display:none; position:fixed; inset:0; background:var(--cream); z-index:1000; overflow-y:auto; padding:24px;">
+    <div style="width:100%; max-width:380px; margin:0 auto; padding:20px 0;">
+      <div style="text-align:center; margin-bottom:24px;">
+        <div style="font-size:64px; margin-bottom:12px;">📲</div>
+        <h2 style="font-size:22px; font-weight:700; color:var(--text-dark);">רוצה לשמור במסך הבית?</h2>
+        <p style="font-size:14px; color:var(--text-mid); margin-top:8px; line-height:1.6;">גישה מהירה לאפליקציה בקליק אחד!</p>
       </div>
 
-      <!-- אייפון -->
-      <div id="iosInstall" style="display:none;">
-        <div style="background:white; border-radius:16px; padding:20px; box-shadow:var(--shadow); text-align:right; margin-bottom:20px;">
-          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid #F5F5F4;">
-            <div style="font-size:28px;">1️⃣</div>
-            <div>
-              <div style="font-weight:700; font-size:15px;">לחץ על כפתור השיתוף</div>
-              <div style="font-size:13px; color:var(--text-mid);">הריבוע עם החץ למעלה ⬆️ בתחתית המסך</div>
-            </div>
-          </div>
-          <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid #F5F5F4;">
-            <div style="font-size:28px;">2️⃣</div>
-            <div>
-              <div style="font-weight:700; font-size:15px;">גלול למטה ובחר</div>
-              <div style="font-size:13px; color:var(--text-mid);">"הוסף למסך הבית" 📱</div>
-            </div>
-          </div>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="font-size:28px;">3️⃣</div>
-            <div>
-              <div style="font-weight:700; font-size:15px;">לחץ "הוסף"</div>
-              <div style="font-size:13px; color:var(--text-mid);">האייקון יופיע על מסך הבית ✅</div>
-            </div>
-          </div>
+      <!-- אנדרואיד Samsung Internet -->
+      <div style="background:white; border-radius:16px; padding:20px; box-shadow:var(--shadow); text-align:right; margin-bottom:16px;">
+        <div style="font-weight:700; font-size:15px; margin-bottom:14px; color:var(--gold-dark);">🤖 Samsung Internet</div>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #F5F5F4;">
+          <div style="font-size:24px;">1️⃣</div>
+          <div><div style="font-weight:600; font-size:14px;">לחץ על שלושת הקווים ☰</div><div style="font-size:12px; color:var(--text-mid);">בתחתית המסך</div></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #F5F5F4;">
+          <div style="font-size:24px;">2️⃣</div>
+          <div><div style="font-weight:600; font-size:14px;">בחר "הוסף עמוד אל"</div><div style="font-size:12px; color:var(--text-mid);">ואז "מסך הבית"</div></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="font-size:24px;">3️⃣</div>
+          <div><div style="font-weight:600; font-size:14px;">לחץ "הוסף"</div><div style="font-size:12px; color:var(--text-mid);">האייקון יופיע על מסך הבית ✅</div></div>
         </div>
       </div>
 
-      <button class="onboard-skip" onclick="skipInstall()">דלג על זה</button>
+      <!-- אנדרואיד Chrome -->
+      <div style="background:white; border-radius:16px; padding:20px; box-shadow:var(--shadow); text-align:right; margin-bottom:16px;">
+        <div style="font-weight:700; font-size:15px; margin-bottom:14px; color:var(--gold-dark);">🤖 Chrome</div>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #F5F5F4;">
+          <div style="font-size:24px;">1️⃣</div>
+          <div><div style="font-weight:600; font-size:14px;">לחץ על שלוש הנקודות ⋮</div><div style="font-size:12px; color:var(--text-mid);">בפינה הימנית העליונה</div></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #F5F5F4;">
+          <div style="font-size:24px;">2️⃣</div>
+          <div><div style="font-weight:600; font-size:14px;">בחר "הוסף למסך הבית"</div></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="font-size:24px;">3️⃣</div>
+          <div><div style="font-weight:600; font-size:14px;">לחץ "הוסף"</div><div style="font-size:12px; color:var(--text-mid);">האייקון יופיע על מסך הבית ✅</div></div>
+        </div>
+      </div>
+
+      <!-- אייפון -->
+      <div style="background:white; border-radius:16px; padding:20px; box-shadow:var(--shadow); text-align:right; margin-bottom:24px;">
+        <div style="font-weight:700; font-size:15px; margin-bottom:14px; color:var(--gold-dark);">🍎 אייפון (Safari)</div>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #F5F5F4;">
+          <div style="font-size:24px;">1️⃣</div>
+          <div><div style="font-weight:600; font-size:14px;">לחץ על כפתור השיתוף ⬆️</div><div style="font-size:12px; color:var(--text-mid);">הריבוע עם החץ בתחתית המסך</div></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #F5F5F4;">
+          <div style="font-size:24px;">2️⃣</div>
+          <div><div style="font-weight:600; font-size:14px;">גלול ובחר "הוסף למסך הבית"</div></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="font-size:24px;">3️⃣</div>
+          <div><div style="font-weight:600; font-size:14px;">לחץ "הוסף"</div><div style="font-size:12px; color:var(--text-mid);">האייקון יופיע על מסך הבית ✅</div></div>
+        </div>
+      </div>
+
+      <!-- כפתורים - משתנים לפי מצב -->
+      <div id="installBtnsFirst" style="display:none; text-align:center;">
+        <button class="onboard-skip" onclick="skipInstall()">דלג על זה</button>
+      </div>
+      <div id="installBtnsReturn" style="display:none; text-align:center;">
+        <button class="onboard-btn" onclick="markInstalled()" style="margin-bottom:12px;">✅ התקנתי - אל תשאל שוב</button>
+        <button class="onboard-skip" onclick="skipInstall()">אולי אחר כך</button>
+      </div>
     </div>
   </div>
 
@@ -1941,23 +1965,19 @@
     });
 
     function showInstallScreen() {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-      // אם כבר מותקן - דלג
       if (window.matchMedia('(display-mode: standalone)').matches) {
         skipInstall();
         return;
       }
-
-      document.getElementById('installScreen').style.display = 'flex';
-
-      if (isIOS) {
-        document.getElementById('androidInstall').style.display = 'none';
-        document.getElementById('iosInstall').style.display = 'block';
-      } else {
-        document.getElementById('androidInstall').style.display = 'block';
-        document.getElementById('iosInstall').style.display = 'none';
+      if (localStorage.getItem('gb_installed') === 'true') {
+        skipInstall();
+        return;
       }
+      const isFirstTime = !localStorage.getItem('gb_install_shown');
+      document.getElementById('installBtnsFirst').style.display = isFirstTime ? 'block' : 'none';
+      document.getElementById('installBtnsReturn').style.display = isFirstTime ? 'none' : 'block';
+      localStorage.setItem('gb_install_shown', 'true');
+      document.getElementById('installScreen').style.display = 'block';
     }
 
     async function installAndroid() {
@@ -1970,6 +1990,12 @@
     }
 
     function skipInstall() {
+      document.getElementById('installScreen').style.display = 'none';
+      renderEvents();
+    }
+
+    function markInstalled() {
+      localStorage.setItem('gb_installed', 'true');
       document.getElementById('installScreen').style.display = 'none';
       renderEvents();
     }
