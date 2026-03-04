@@ -2108,6 +2108,8 @@
       greeting: greetingText,
       eventName: eventName,
       eventEmoji: eventEmoji,
+      template: selectedTemplate || 1,
+      color: selectedColor || '#F59E0B',
       createdAt: new Date().toISOString()
     };
 
@@ -2250,19 +2252,29 @@
 
         if (docSnap.exists()) {
           const card = docSnap.data();
+          const color = card.color || '#F59E0B';
+          const templates = {
+            1: `background:#fff; color:#1C1917; border-right:6px solid ${color};`,
+            2: `background:linear-gradient(135deg, #FEF3C7, #FDE68A); color:#1C1917;`,
+            3: `background:linear-gradient(135deg, ${color}, #F97316); color:#fff;`,
+            4: `background:#F0FDF4; color:#1C1917; border:3px dashed ${color};`,
+            5: `background:linear-gradient(135deg, #1C1917, #44403C); color:#fff;`
+          };
+          const templateStyle = templates[card.template] || templates[1];
           document.getElementById('card-container').innerHTML = `
             <div style="
-              background: white;
+              ${templateStyle}
               border-radius: 24px;
               padding: 40px;
               max-width: 380px;
               box-shadow: 0 8px 32px rgba(0,0,0,0.12);
               direction: rtl;
+              font-family: 'Heebo', sans-serif;
             ">
               <div style="font-size: 64px; margin-bottom: 16px;">${card.eventEmoji}</div>
-              <h2 style="margin-bottom: 24px; color: #333;">${card.eventName}</h2>
-              <p style="font-size: 18px; line-height: 1.8; color: #555;">${card.greeting}</p>
-              <p style="margin-top: 24px; font-size: 12px; color: #aaa;">נשלח דרך Greeting Buddy 💌</p>
+              <h2 style="margin-bottom: 24px;">${card.eventName}</h2>
+              <p style="font-size: 18px; line-height: 1.8;">${card.greeting}</p>
+              <p style="margin-top: 24px; font-size: 12px; opacity: 0.6;">נשלח דרך Greeting Buddy 💌</p>
             </div>
           `;
         } else {
