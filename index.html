@@ -1549,11 +1549,34 @@
 
     async function requestNotifications() {
   try {
-    await Notification.requestPermission();
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      try {
+        const token = await window.fcmGetToken(window.fcmMessaging, {
+          vapidKey: window.fcmVapidKey,
+          serviceWorkerRegistration: await navigator.serviceWorker.getRegistration()
+        });
+        if (token) {
+          const user = JSON.parse(localStorage.getItem('gb_user') || '{}');
+          user.fcmToken = token;
+          localStorage.setItem('gb_user', JSON.stringify(user));
+          if (window.firestoreSetDoc && window.firestoreDoc && window.db && user.userId) {
+            await window.firestoreSetDoc(
+              window.firestoreDoc(window.db, 'users', user.userId),
+              { fcmToken: token },
+              { merge: true }
+            );
+          }
+          console.log('FCM token saved:', token);
+        }
+      } catch(e) {
+        console.log('FCM token error:', e);
+      }
+    }
   } catch(e) {
     console.log('Permission error:', e);
   }
-  initApp();
+  finishOnboarding();
 }
 
     function finishOnboarding() {
