@@ -658,7 +658,9 @@
     }
 
     /* ===== SCREENS ===== */
-    #addEventScreen {
+    #addEventScreen,
+    #settingsScreen,
+    #installScreen {
       position: fixed;
       inset: 0;
       background: var(--cream);
@@ -1971,15 +1973,7 @@
         skipInstall();
         return;
       }
-      const el = document.getElementById('installScreen');
-      el.style.display = 'block';
-      el.style.position = 'fixed';
-      el.style.top = '0';
-      el.style.left = '0';
-      el.style.right = '0';
-      el.style.bottom = '0';
-      el.style.zIndex = '9999';
-      el.style.overflowY = 'auto';
+      document.getElementById('installScreen').style.display = 'block';
     }
 
     async function installAndroid() {
