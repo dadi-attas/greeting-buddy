@@ -1479,7 +1479,7 @@
 
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('firebase-messaging-sw.js');
+      navigator.serviceWorker.register('sw.js');
     }
 
     // Onboarding Logic
@@ -1550,31 +1550,28 @@
     async function requestNotifications() {
   try {
     const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      try {
-        const token = await window.fcmGetToken(window.fcmMessaging, {
-          vapidKey: window.fcmVapidKey,
-          serviceWorkerRegistration: await navigator.serviceWorker.ready
-        });
-        if (token) {
-          const user = JSON.parse(localStorage.getItem('gb_user') || '{}');
-          user.fcmToken = token;
-          localStorage.setItem('gb_user', JSON.stringify(user));
-          if (window.firestoreSetDoc && window.firestoreDoc && window.db && user.userId) {
-            await window.firestoreSetDoc(
-              window.firestoreDoc(window.db, 'users', user.userId),
-              { fcmToken: token },
-              { merge: true }
-            );
-          }
-          console.log('FCM token saved:', token);
-        }
-      } catch(e) {
-        console.log('FCM token error:', e);
-      }
+    if (permission !== 'granted') return;
+
+    const swReg = await navigator.serviceWorker.ready;
+    const subscription = await swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: 'BJo-IapBOoZYHpBVxRNERrJMAAurjkKyb--ogxJPlsMiCvnvMrVqJp67rdj4IDXPuTAuWaAo_bvEDsUwfCpL_e4'
+    });
+
+    const user = JSON.parse(localStorage.getItem('gb_user') || '{}');
+    user.pushSubscription = JSON.stringify(subscription);
+    localStorage.setItem('gb_user', JSON.stringify(user));
+
+    if (window.firestoreSetDoc && window.firestoreDoc && window.db && user.userId) {
+      await window.firestoreSetDoc(
+        window.firestoreDoc(window.db, 'users', user.userId),
+        { pushSubscription: JSON.stringify(subscription) },
+        { merge: true }
+      );
     }
+    console.log('Push subscription saved!');
   } catch(e) {
-    console.log('Permission error:', e);
+    console.log('Push subscription error:', e);
   }
   finishOnboarding();
 }
