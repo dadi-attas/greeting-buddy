@@ -1404,7 +1404,6 @@
         <button class="onboard-btn" onclick="finishOnboarding()">מתחילים</button>
       </div>
 
-      <!-- שלב 3: הגדרות תזכורת -->
     </div>
   </div>
 
@@ -1433,13 +1432,13 @@
 
   </main>
 
-  <button class="fab" id="addEventBtn" onclick="showGreeting()">✍️ כתוב ברכה</button>
+  <button class="fab" id="addEventBtn" onclick="showAddEvent()">＋ הוספת אירוע</button>
   <!-- כפתור איפוס - למפתח בלבד, להסיר לפני השקה -->
   <button onclick="localStorage.clear(); location.reload();" style="position:fixed; bottom:24px; left:16px; background:#EF4444; color:white; border:none; border-radius:20px; padding:10px 16px; font-family:Heebo,sans-serif; font-size:13px; font-weight:700; cursor:pointer; z-index:999;">🔄 איפוס</button>
 
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('firebase-messaging-sw.js');
+      navigator.serviceWorker.register('sw.js');
     }
 
     // Onboarding Logic
@@ -1510,31 +1509,28 @@
     async function requestNotifications() {
   try {
     const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      try {
-        const token = await window.fcmGetToken(window.fcmMessaging, {
-          vapidKey: window.fcmVapidKey,
-          serviceWorkerRegistration: await navigator.serviceWorker.getRegistration()
-        });
-        if (token) {
-          const user = JSON.parse(localStorage.getItem('gb_user') || '{}');
-          user.fcmToken = token;
-          localStorage.setItem('gb_user', JSON.stringify(user));
-          if (window.firestoreSetDoc && window.firestoreDoc && window.db && user.userId) {
-            await window.firestoreSetDoc(
-              window.firestoreDoc(window.db, 'users', user.userId),
-              { fcmToken: token },
-              { merge: true }
-            );
-          }
-          console.log('FCM token saved:', token);
-        }
-      } catch(e) {
-        console.log('FCM token error:', e);
-      }
+    if (permission !== 'granted') return;
+
+    const swReg = await navigator.serviceWorker.ready;
+    const subscription = await swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: 'BJo-IapBOoZYHpBVxRNERrJMAAurjkKyb--ogxJPlsMiCvnvMrVqJp67rdj4IDXPuTAuWaAo_bvEDsUwfCpL_e4'
+    });
+
+    const user = JSON.parse(localStorage.getItem('gb_user') || '{}');
+    user.pushSubscription = JSON.stringify(subscription);
+    localStorage.setItem('gb_user', JSON.stringify(user));
+
+    if (window.firestoreSetDoc && window.firestoreDoc && window.db && user.userId) {
+      await window.firestoreSetDoc(
+        window.firestoreDoc(window.db, 'users', user.userId),
+        { pushSubscription: JSON.stringify(subscription) },
+        { merge: true }
+      );
     }
+    console.log('Push subscription saved!');
   } catch(e) {
-    console.log('Permission error:', e);
+    console.log('Push subscription error:', e);
   }
   finishOnboarding();
 }
@@ -1546,9 +1542,11 @@
         reminderTime: '09:00',
         reminderFollowupHours: 3
       };
-      localStorage.setItem('gb_user', JSON.stringify(user));
-      user.userId = 'user_' + Date.now();
-      localStorage.setItem('gb_user', JSON.stringify(user));
+      const existing = JSON.parse(localStorage.getItem('gb_user') || '{}');
+      const merged = { ...existing, ...user };
+      localStorage.setItem('gb_user', JSON.stringify(merged));
+      merged.userId = merged.userId || 'user_' + Date.now();
+      localStorage.setItem('gb_user', JSON.stringify(merged));
       if (window.saveToFirebase) window.saveToFirebase();
       document.getElementById('onboarding').style.display = 'none';
       showInstallScreen();
@@ -2105,10 +2103,15 @@
 
   if (!greetingText) return;
 
-  // צור מזהה ייחודי לכרטיס
   const cardId = 'card_' + Date.now();
+  const cardUrl = `https://dadi-attas.github.io/greeting-buddy/?card=${cardId}`;
+  const message = `🎴 כרטיס ברכה מיוחד עבורך:\n${cardUrl}\n\nהופק על ידי Greeting Buddy 💌`;
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
 
-  // שמור כרטיס בפיירסטור
+  // פתח וואטסאפ מיד - לפני כל await (חובה ל-iOS Safari)
+  window.open(whatsappUrl, '_blank');
+
+  // שמור כרטיס בפיירסטור ברקע
   try {
     const cardData = {
       greeting: greetingText,
@@ -2119,25 +2122,13 @@
       sign: greetingAnswers.sign || '',
       createdAt: new Date().toISOString()
     };
-
     await window.firestoreSetDoc(
       window.firestoreDoc(window.db, 'cards', cardId),
       cardData
     );
-
-    const cardUrl = `https://dadi-attas.github.io/greeting-buddy/?card=${cardId}`;
-
-    const message = `🎴 כרטיס ברכה מיוחד עבורך:\n${cardUrl}\n\nהופק על ידי Greeting Buddy 💌`;
-
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-
+    console.log('Card saved:', cardId);
   } catch(e) {
     console.log('Card save error:', e);
-    // פולבק - שלח טקסט בלי קישור
-    const message = `${eventEmoji} ${greetingText}`;
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
   }
 }
 
@@ -2196,7 +2187,6 @@
       if (!name) { alert('נא להכניס שם'); return; }
 
       const today = new Date().toISOString().split('T')[0];
-
       const events = JSON.parse(localStorage.getItem('gb_events') || '[]');
       events.push({
         id: Date.now(),
@@ -2205,9 +2195,6 @@
         emoji: currentEventEmoji,
         date: today,
         recurring: false,
-        greetingPrepared: false
-      });
-        recurring: recurring,
         greetingPrepared: false
       });
       localStorage.setItem('gb_events', JSON.stringify(events));
