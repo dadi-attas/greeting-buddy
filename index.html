@@ -1554,7 +1554,7 @@
       try {
         const token = await window.fcmGetToken(window.fcmMessaging, {
           vapidKey: window.fcmVapidKey,
-          serviceWorkerRegistration: await navigator.serviceWorker.getRegistration()
+          serviceWorkerRegistration: await navigator.serviceWorker.ready
         });
         if (token) {
           const user = JSON.parse(localStorage.getItem('gb_user') || '{}');
@@ -1586,9 +1586,11 @@
         reminderTime: document.getElementById('reminderTime').value,
         reminderFollowupHours: 3
       };
-      localStorage.setItem('gb_user', JSON.stringify(user));
-      user.userId = 'user_' + Date.now();
-      localStorage.setItem('gb_user', JSON.stringify(user));
+      const existing = JSON.parse(localStorage.getItem('gb_user') || '{}');
+      const merged = { ...existing, ...user };
+      localStorage.setItem('gb_user', JSON.stringify(merged));
+      merged.userId = merged.userId || 'user_' + Date.now();
+      localStorage.setItem('gb_user', JSON.stringify(merged));
       if (window.saveToFirebase) window.saveToFirebase();
       document.getElementById('onboarding').style.display = 'none';
       showInstallScreen();
