@@ -1185,14 +1185,6 @@
           <span class="details-label">📅 תאריך</span>
           <span class="details-value" id="detailsDate"></span>
         </div>
-        <div class="details-row">
-          <span class="details-label">⏳ נותר</span>
-          <span class="details-value" id="detailsDaysLeft"></span>
-        </div>
-        <div class="details-row" id="detailsRecurringRow">
-          <span class="details-label">🔁 חוזר כל שנה</span>
-          <span class="details-value">כן ✓</span>
-        </div>
       </div>
 
       <button class="onboard-btn" id="createGreetingBtn" onclick="startGreeting()">
@@ -1368,19 +1360,7 @@
           <input type="text" id="celebrantName" placeholder="שם פרטי" maxlength="30" />
         </div>
 
-        <div class="onboard-field">
-          <label>תאריך האירוע</label>
-          <input type="date" id="eventDate" />
-        </div>
-
-        <div class="onboard-field" id="recurringField" style="display:none;">
-          <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-            <input type="checkbox" id="recurringCheck" checked style="width:20px; height:20px; accent-color:var(--gold);" />
-            להזכיר לי כל שנה
-          </label>
-        </div>
-
-        <button class="onboard-btn" onclick="saveEvent()">שמירת אירוע ✓</button>
+        <button class="onboard-btn" onclick="saveEvent()">כתוב ברכה ✨</button>
       </div>
 
     </div>
@@ -1394,8 +1374,7 @@
       <div class="onboard-step" id="step1">
         <div class="onboard-emoji">👋</div>
         <h1>ברוך הבא!</h1>
-        <p>Greeting Buddy עוזר לך לא לשכוח אירועים חשובים - ולא להיתקע עם מה לכתוב 😊</p>
-        <p style="margin-top:12px; font-size:14px; color:#78716C; line-height:1.7;">שמרו אירועים חשובים - ימי הולדת, חתונות, חגים ועוד.<br>אנחנו נתזכר אותך לפני האירוע ונעזור לך לכתוב ברכה אישית מוכנה לשליחה בוואטסאפ 🎉</p>
+        <p>אפליקציה לכתיבת ברכה בעזרת AI ושליחתה באופן מיידי</p>
         <button class="onboard-btn" onclick="goStep(2)">מתחילים!</button>
       </div>
 
@@ -1414,36 +1393,9 @@
             <button class="gender-btn" id="genderFemale" onclick="setGender('female')">אישה</button>
           </div>
         </div>
-        <button class="onboard-btn" onclick="goStep(3)">מתחילים</button>
+        <button class="onboard-btn" onclick="finishOnboarding()">מתחילים</button>
       </div>
 
-      <!-- שלב 3: הגדרות תזכורת -->
-      <div class="onboard-step" id="step3" style="display:none;">
-        <div class="onboard-emoji">🔔</div>
-        <h1>תזכורות</h1>
-        <p id="reminderStepText">באיזו שעה ביום האירוע תרצה לקבל תזכורת?</p>
-        <div class="onboard-field">
-          <label>שעת התזכורת</label>
-          <select id="reminderTime">
-            <option value="07:00">07:00</option>
-            <option value="08:00">08:00</option>
-            <option value="09:00" selected>09:00</option>
-            <option value="10:00">10:00</option>
-            <option value="11:00">11:00</option>
-            <option value="12:00">12:00</option>
-          </select>
-        </div>
-        <button class="onboard-btn" onclick="goStep(4)">המשך</button>
-      </div>
-
-      <!-- שלב 4: אישור התראות -->
-      <div class="onboard-step" id="step4" style="display:none;">
-        <div class="onboard-emoji">🎉</div>
-        <h1>כמעט סיימנו!</h1>
-        <p>כדי שנוכל להזכיר לך לפני אירועים - אנחנו צריכים את רשותך לשלוח התראות.</p>
-        <button class="onboard-btn" onclick="requestNotifications()">אישור התראות</button>
-        <button class="onboard-skip" onclick="finishOnboarding()">דלג על זה</button>
-      </div>
 
     </div>
   </div>
@@ -1473,7 +1425,7 @@
 
   </main>
 
-  <button class="fab" id="addEventBtn" onclick="showAddEvent()">＋ הוספת אירוע</button>
+  <button class="fab" id="addEventBtn" onclick="showAddEvent()">✨ כתוב ברכה</button>
   <!-- כפתור איפוס - למפתח בלבד, להסיר לפני השקה -->
   <button onclick="localStorage.clear(); location.reload();" style="position:fixed; bottom:24px; left:16px; background:#EF4444; color:white; border:none; border-radius:20px; padding:10px 16px; font-family:Heebo,sans-serif; font-size:13px; font-weight:700; cursor:pointer; z-index:999;">🔄 איפוס</button>
 
@@ -2214,40 +2166,33 @@
       currentEventEmoji = emoji;
       isRecurring = recurring;
       document.getElementById('selectedTypeBadge').textContent = emoji + ' ' + type;
-      // הצג צ'קבוקס רק ליום הולדת ויום נישואים
-      const showRecurring = (type === 'יום הולדת' || type === 'יום נישואים');
-      document.getElementById('recurringField').style.display = showRecurring ? 'block' : 'none';
-      if (showRecurring) document.getElementById('recurringCheck').checked = true;
       document.getElementById('topicsStep').style.display = 'none';
       document.getElementById('detailsStep').style.display = 'block';
       document.getElementById('celebrantName').value = '';
-      document.getElementById('eventDate').value = '';
     }
 
     function saveEvent() {
       const name = document.getElementById('celebrantName').value.trim();
-      const date = document.getElementById('eventDate').value;
       if (!name) { alert('נא להכניס שם'); return; }
-      if (!date) { alert('נא לבחור תאריך'); return; }
-
-      const recurringVisible = document.getElementById('recurringField').style.display !== 'none';
-      const recurring = recurringVisible ? document.getElementById('recurringCheck').checked : false;
 
       const events = JSON.parse(localStorage.getItem('gb_events') || '[]');
+      const newId = Date.now();
       events.push({
-        id: Date.now(),
+        id: newId,
         type: currentEventType,
         name: name,
         emoji: currentEventEmoji,
-        date: date,
-        recurring: recurring,
+        date: '',
+        recurring: false,
         greetingPrepared: false
       });
       localStorage.setItem('gb_events', JSON.stringify(events));
       if (window.saveToFirebase) window.saveToFirebase();
 
+      currentEventId = newId;
       closeAddEvent();
-      renderEvents();
+      startGreeting();
+      document.getElementById('greetingScreen').style.display = 'block';
     }
 
     function smartBack() {
