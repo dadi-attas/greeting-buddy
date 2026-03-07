@@ -1532,7 +1532,7 @@
       const user = {
         firstName: document.getElementById('userName').value.trim(),
         gender: selectedGender,
-        reminderTime: document.getElementById('reminderTime').value,
+        reminderTime: '09:00',
         reminderFollowupHours: 3
       };
       const existing = JSON.parse(localStorage.getItem('gb_user') || '{}');
