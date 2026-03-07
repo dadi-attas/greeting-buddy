@@ -2173,10 +2173,6 @@
       currentEventEmoji = emoji;
       isRecurring = recurring;
       document.getElementById('selectedTypeBadge').textContent = emoji + ' ' + type;
-      // הצג צ'קבוקס רק ליום הולדת ויום נישואים
-      const showRecurring = (type === 'יום הולדת' || type === 'יום נישואים');
-      document.getElementById('recurringField').style.display = showRecurring ? 'block' : 'none';
-      if (showRecurring) document.getElementById('recurringCheck').checked = true;
       document.getElementById('topicsStep').style.display = 'none';
       document.getElementById('detailsStep').style.display = 'block';
       document.getElementById('celebrantName').value = '';
