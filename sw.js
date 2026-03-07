@@ -1,22 +1,17 @@
-importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
-
-firebase.initializeApp({
-  apiKey: "AIzaSyCzEAgtaObHrIxkVqPxtmH5tSAVJjMulew",
-  authDomain: "greeting-buddy.firebaseapp.com",
-  projectId: "greeting-buddy",
-  storageBucket: "greeting-buddy.firebasestorage.app",
-  messagingSenderId: "1040850875564",
-  appId: "1:1040850875564:web:e3d2658b94ec384d525b09"
+self.addEventListener('push', function(event) {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || 'Greeting Buddy';
+  const options = {
+    body: data.body || 'יש לך אירוע קרוב!',
+    icon: '/greeting-buddy/icon-192.png',
+    badge: '/greeting-buddy/icon-192.png',
+    dir: 'rtl',
+    lang: 'he'
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
-const messaging = firebase.messaging();
-
-messaging.onBackgroundMessage(function(payload) {
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/greeting-buddy/icon-192.png'
-  };
-  self.registration.showNotification(notificationTitle, notificationOptions);
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  event.waitUntil(clients.openWindow('/greeting-buddy/'));
 });
