@@ -2147,10 +2147,15 @@
 
   if (!greetingText) return;
 
-  // צור מזהה ייחודי לכרטיס
   const cardId = 'card_' + Date.now();
+  const cardUrl = `https://dadi-attas.github.io/greeting-buddy/?card=${cardId}`;
+  const message = `🎴 כרטיס ברכה מיוחד עבורך:\n${cardUrl}\n\nהופק על ידי Greeting Buddy 💌`;
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
 
-  // שמור כרטיס בפיירסטור
+  // פתח וואטסאפ מיד - לפני כל await (חובה ל-iOS Safari)
+  window.open(whatsappUrl, '_blank');
+
+  // שמור כרטיס בפיירסטור ברקע
   try {
     const cardData = {
       greeting: greetingText,
@@ -2161,25 +2166,13 @@
       sign: greetingAnswers.sign || '',
       createdAt: new Date().toISOString()
     };
-
     await window.firestoreSetDoc(
       window.firestoreDoc(window.db, 'cards', cardId),
       cardData
     );
-
-    const cardUrl = `https://dadi-attas.github.io/greeting-buddy/?card=${cardId}`;
-
-    const message = `🎴 כרטיס ברכה מיוחד עבורך:\n${cardUrl}\n\nהופק על ידי Greeting Buddy 💌`;
-
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-
+    console.log('Card saved:', cardId);
   } catch(e) {
     console.log('Card save error:', e);
-    // פולבק - שלח טקסט בלי קישור
-    const message = `${eventEmoji} ${greetingText}`;
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
   }
 }
 
